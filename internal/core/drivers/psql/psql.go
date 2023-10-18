@@ -2,7 +2,9 @@ package psql
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/errors"
 	"github.com/jmoiron/sqlx"
 )
@@ -14,18 +16,13 @@ const (
 	ErrClose = errors.Error("failed to close postgres db connection")
 )
 
-// Config represents the configuration for our postgres database.
-type Config struct {
-	Addr string `yaml:"addr"`
-}
-
 type Driver struct {
-	cfg Config
+	cfg *config.Config
 	db  *sqlx.DB
 }
 
 // New instantiates an instance of the Driver.
-func New(cfg Config) *Driver {
+func New(cfg *config.Config) *Driver {
 	return &Driver{
 		cfg: cfg,
 	}
@@ -33,7 +30,8 @@ func New(cfg Config) *Driver {
 
 // Connect connects to the database.
 func (d *Driver) Connect(ctx context.Context) error {
-	db, err := sqlx.Connect("postgres", d.cfg.Addr)
+	fmt.Println(d.cfg)
+	db, err := sqlx.Connect("postgres", d.cfg.DB)
 	if err != nil {
 		return ErrConnect.Wrap(err)
 	}

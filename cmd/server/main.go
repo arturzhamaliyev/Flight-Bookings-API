@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/app"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/drivers/psql"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/listeners/http"
+	"github.com/gin-gonic/gin"
+
+	// "github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/listeners/http"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/logging"
 	httptransport "github.com/arturzhamaliyev/Flight-Bookings-API/internal/transport/http"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users"
@@ -15,7 +20,7 @@ import (
 )
 
 func main() {
-	app.Start(func(ctx context.Context, a *app.App) ([]app.Listener, error) {
+	app.Start(func(ctx context.Context, a *app.App) (func(), error) {
 		// Load configuration from config/config.yaml which contains details such as DB connection params
 		cfg, err := config.Load(ctx)
 		if err != nil {
@@ -45,18 +50,27 @@ func main() {
 		users := users.New(store)
 		s := httptransport.New(users, db.GetDB())
 
-		// Create a HTTP server
-		h := http.New(s, cfg.HTTP)
+		r := gin.Default()
+		s.AddRoutes(r)
+
+		server := &http.Server{
+			Addr:              ":" + cfg.Port,
+			Handler:           r,
+			ReadHeaderTimeout: 60 * time.Second,
+		}
 
 		// Start listening for HTTP requests
-		return []app.Listener{
-			h,
+		return func() {
+			err := server.ListenAndServe()
+			if err != nil {
+				logging.From(ctx).Error(fmt.Sprintf("failed to serve on port: %v", cfg.Port), zap.Error(err))
+			}
 		}, nil
 	})
 }
 
 func initDatabase(ctx context.Context, cfg *config.Config, app *app.App) (*psql.Driver, error) {
-	db := psql.New(cfg.PSQL)
+	db := psql.New(cfg)
 
 	err := db.Connect(ctx)
 	if err != nil {

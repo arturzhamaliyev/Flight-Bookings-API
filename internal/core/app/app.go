@@ -5,17 +5,12 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/logging"
+
 	"go.uber.org/zap"
 )
-
-// Listener represents a type that can listen for incoming connections.
-type Listener interface {
-	Listen(ctx context.Context) error
-}
 
 // OnShutdownFunc is a function that is called when the app is shutdown.
 type OnShutdownFunc func()
@@ -27,7 +22,7 @@ type App struct {
 }
 
 // Launch is a function that is called when the app is started.
-type Launch func(ctx context.Context, a *App) ([]Listener, error)
+type Launch func(ctx context.Context, a *App) (func(), error)
 
 // Start starts the application.
 func Start(launch Launch) {
@@ -45,7 +40,7 @@ func Start(launch Launch) {
 
 	logging.From(ctx).Info("app starting...")
 
-	listeners, err := launch(ctx, a)
+	listenAndServe, err := launch(ctx, a)
 	if err != nil {
 		logging.From(ctx).Fatal("failed to start app", zap.Error(err))
 	}
@@ -58,22 +53,7 @@ func Start(launch Launch) {
 		os.Exit(1)
 	}()
 
-	var wg sync.WaitGroup
-
-	for _, listener := range listeners {
-		wg.Add(1)
-		listener := listener
-
-		go func() {
-			defer wg.Done()
-
-			err := listener.Listen(ctx)
-			if err != nil {
-				logging.From(ctx).Error("listener failed", zap.Error(err))
-			}
-		}()
-	}
-	wg.Wait()
+	listenAndServe()
 
 	shutdown(ctx, a)
 }
