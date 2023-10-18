@@ -21,7 +21,12 @@ func (s *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	s.users.CreateUser(ctx, user)
+	err = s.users.CreateUser(ctx, user)
+	if err != nil {
+		logging.From(ctx).Info("failed to create user", zap.Error(err))
+		handleError(ctx, err)
+		return
+	}
 
 	ctx.JSON(http.StatusCreated, "")
 }

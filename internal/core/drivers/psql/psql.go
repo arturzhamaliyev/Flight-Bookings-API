@@ -16,7 +16,7 @@ const (
 
 // Config represents the configuration for our postgres database.
 type Config struct {
-	DSN string `env:"POSTGRES_DSN" validate:"required"`
+	Addr string `yaml:"addr"`
 }
 
 type Driver struct {
@@ -33,7 +33,7 @@ func New(cfg Config) *Driver {
 
 // Connect connects to the database.
 func (d *Driver) Connect(ctx context.Context) error {
-	db, err := sqlx.Connect("postgres", d.cfg.DSN)
+	db, err := sqlx.Connect("postgres", d.cfg.Addr)
 	if err != nil {
 		return ErrConnect.Wrap(err)
 	}
