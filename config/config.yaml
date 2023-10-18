@@ -3,5 +3,3 @@ http:
 
 psql:
   addr: postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable
-
-kekw: "sd"
