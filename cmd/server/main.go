@@ -11,7 +11,6 @@ import (
 	httptransport "github.com/arturzhamaliyev/Flight-Bookings-API/internal/transport/http"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/store"
-	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 )
 
@@ -59,10 +58,9 @@ func main() {
 func initDatabase(ctx context.Context, cfg *config.Config, app *app.App) (*psql.Driver, error) {
 	db := psql.New(cfg.PSQL)
 
-	err := backoff.Retry(func() error {
-		return db.Connect(ctx)
-	}, backoff.NewExponentialBackOff())
+	err := db.Connect(ctx)
 	if err != nil {
+		logging.From(ctx).Error("failed connect to db", zap.Error(err))
 		return nil, err
 	}
 
