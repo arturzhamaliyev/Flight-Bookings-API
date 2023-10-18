@@ -47,7 +47,7 @@ func (s *Store) InsertUser(ctx context.Context, user model.User) error {
 				$1, $2, $3, $4, $5, $6, $7
 			)
 			`,
-			user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
+			user)
 	if err != nil {
 		return err
 	}

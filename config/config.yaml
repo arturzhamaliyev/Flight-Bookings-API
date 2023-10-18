@@ -1,5 +1,2 @@
 http:
   port: "8080"
-
-psql:
-  addr: postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable
