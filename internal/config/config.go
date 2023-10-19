@@ -10,21 +10,17 @@ import (
 // ErrProcess is returned when the environment variables can not be processed.
 var ErrProcess = errors.New("failed to process variables")
 
-const (
-	configName = "config"
-)
-
 // Config represents the configuration of our application.
 type Config struct {
 	Port   int    `default:"8080"`
-	DBAddr string `default:"postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable"`
+	DBAddr string `envconfig:"DB_ADDR"`
 }
 
 // Load loads the configuration from the file.
 func Load() (*Config, error) {
 	var cfg Config
 
-	err := envconfig.Process(configName, &cfg)
+	err := envconfig.Process("cfg", &cfg)
 	if err != nil {
 		return nil, e.Wrap(ErrProcess, err)
 	}

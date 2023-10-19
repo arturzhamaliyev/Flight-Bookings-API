@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS users(
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT id_unique UNIQUE (id),
     CONSTRAINT email_unique UNIQUE (email)
 );
 CREATE INDEX idx_users_email ON users (email);
