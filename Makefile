@@ -1,8 +1,9 @@
-run: migrate_up
+run:
 	go run cmd/server/main.go
 
+migrate := migrate -source file://migrations -database postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable
 migrate_up:
-	migrate -source file://migrations -database postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable up
+	$(migrate) up
 
 migrate_down:
-	migrate -source file://migrations -database postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable down
+	$(migrate) down

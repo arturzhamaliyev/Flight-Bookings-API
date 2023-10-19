@@ -9,25 +9,31 @@ import (
 	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/handler"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 
 	"github.com/jmoiron/sqlx"
 
-	httptransport "github.com/arturzhamaliyev/Flight-Bookings-API/internal/transport/http"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/store"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/repository"
 	"go.uber.org/zap"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
 	// Create new Logger instance with default production logging configuration.
-	logg, err := zap.NewProduction()
+	loggerDefault, err := zap.NewProduction()
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger := logg.Sugar()
-	defer logger.Sync()
+	zap.ReplaceGlobals(loggerDefault)
+	defer func() {
+		err := loggerDefault.Sync()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	logger := loggerDefault.Sugar()
 
 	logger.Info("app starting...")
 
@@ -51,12 +57,17 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	defer db.Close()
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			logger.Fatal(err)
+		}
+	}()
 
 	// Instantiate and connect all our classes
-	store := store.New(db)
-	users := users.New(store)
-	server := httptransport.New(cfg, logger, users, db)
+	repo := repository.New(db)
+	services := service.New(repo)
+	server := handler.New(cfg, services)
 
 	go func() {
 		// Start listening for HTTP requests
@@ -78,7 +89,7 @@ func main() {
 }
 
 func initDatabase(ctx context.Context, logger *zap.SugaredLogger, cfg *config.Config) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres", cfg.DBAddr)
+	db, err := sqlx.Connect("pgx", cfg.DBAddr)
 	if err != nil {
 		logger.Infof("failed connect to db: %v", err)
 		return nil, err
