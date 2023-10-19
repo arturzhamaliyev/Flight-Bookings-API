@@ -8,6 +8,21 @@ import (
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/model"
 )
 
+const insertUser = `
+INSERT INTO users(
+	first_name,
+	last_name,
+	password,
+	email,
+	country,
+	created_at,
+	updated_at
+)
+VALUES (
+	$1, $2, $3, $4, $5, $6, $7
+)
+`
+
 // DB represents a type for interfacing with a postgres database.
 type DB interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
@@ -27,26 +42,13 @@ func New(db DB) *Store {
 
 // InsertUser will add a new unique user to the database using the provided data.
 func (s *Store) InsertUser(ctx context.Context, user model.User) error {
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = user.CreatedAt
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
 
 	_, err := s.db.
 		ExecContext(
 			ctx,
-			`
-			INSERT INTO users(
-				first_name,
-				last_name,
-				password,
-				email,
-				country,
-				created_at,
-				updated_at
-			)
-			VALUES (
-				$1, $2, $3, $4, $5, $6, $7
-			)
-			`,
+			insertUser,
 			user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err

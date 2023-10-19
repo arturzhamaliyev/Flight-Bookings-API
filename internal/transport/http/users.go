@@ -3,11 +3,9 @@ package http
 import (
 	"net/http"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/errors"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/logging"
+	e "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/model"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 func (s *Server) createUser(ctx *gin.Context) {
@@ -16,14 +14,14 @@ func (s *Server) createUser(ctx *gin.Context) {
 	var user model.User
 	err := ctx.ShouldBindJSON(&user)
 	if err != nil {
-		logging.From(ctx).Info("failed to bind json", zap.Error(err))
-		handleError(ctx, errors.ErrInvalidRequest.Wrap(err))
+		s.logger.Infof("failed to bind json: %v", err)
+		handleError(ctx, e.Wrap(e.ErrInvalidRequest, err))
 		return
 	}
 
 	err = s.users.CreateUser(ctx, user)
 	if err != nil {
-		logging.From(ctx).Info("failed to create user", zap.Error(err))
+		s.logger.Infof("failed to create user: %v", err)
 		handleError(ctx, err)
 		return
 	}

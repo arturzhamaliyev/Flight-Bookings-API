@@ -2,10 +2,14 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/model"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // Users represents a type that provides operations on users.
@@ -15,32 +19,39 @@ type Users interface {
 
 // DB represents a type that can be used to interact with the database.
 type DB interface {
-	PingContext(context.Context) error
+	PingContext(ctx context.Context) error
 }
 
 // Server represents a HTTP server that can handle requests for this service.
 type Server struct {
-	users Users
-	db    DB
+	logger *zap.SugaredLogger
+	users  Users
+	db     DB
 }
 
 // New will instantiate a new instance of Server.
-func New(users Users, db DB) *Server {
-	return &Server{
-		users: users,
-		db:    db,
+func New(cfg *config.Config, logger *zap.SugaredLogger, users Users, db DB) *http.Server {
+	s := &Server{
+		logger: logger,
+		users:  users,
+		db:     db,
 	}
-}
 
-// AddRoutes will add the routes this server supports to the router.
-func (s *Server) AddRoutes(r *gin.Engine) {
+	r := gin.Default()
+
 	r.GET("/health", s.healthCheck)
 
 	v1 := r.Group("/v1")
 
-	users := v1.Group("/users")
+	user := v1.Group("/users")
 	{
-		users.POST("/", s.createUser)
+		user.POST("/", s.createUser)
+	}
+
+	return &http.Server{
+		Addr:              fmt.Sprintf(":%d", cfg.Port),
+		Handler:           r,
+		ReadHeaderTimeout: 60 * time.Second,
 	}
 }
 

@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/users/model"
 )
@@ -25,5 +26,8 @@ func New(s Store) *Users {
 
 // CreateUser will try to create a user in our database.
 func (u *Users) CreateUser(ctx context.Context, user model.User) error {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = user.CreatedAt
+
 	return u.store.InsertUser(ctx, user)
 }

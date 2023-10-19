@@ -1,47 +1,33 @@
 package config
 
 import (
-	"context"
+	"errors"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/core/errors"
-	"github.com/spf13/viper"
+	e "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
+	"github.com/kelseyhightower/envconfig"
 )
 
-const (
-	// ErrRead is returned when the configuration file cannot be read.
-	ErrRead = errors.Error("failed to read file")
-	// ErrUnmarshal is returned when the configuration file cannot be unmarshalled.
-	ErrUnmarshal = errors.Error("failed to unmarshal file")
-)
+// ErrProcess is returned when the environment variables can not be processed.
+var ErrProcess = errors.New("failed to process variables")
 
 const (
 	configName = "config"
-	configType = "json"
-	configPath = "./config"
 )
 
 // Config represents the configuration of our application.
 type Config struct {
-	Port string `json:"port"`
-	DB   string `json:"db"`
+	Port   int    `default:"8080"`
+	DBAddr string `default:"postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable"`
 }
 
 // Load loads the configuration from the file.
-func Load(ctx context.Context) (*Config, error) {
-	cfg := new(Config)
+func Load() (*Config, error) {
+	var cfg Config
 
-	viper.SetConfigName(configName)
-	viper.SetConfigType(configType)
-	viper.AddConfigPath(configPath)
-	err := viper.ReadInConfig()
+	err := envconfig.Process(configName, &cfg)
 	if err != nil {
-		return nil, ErrRead.Wrap(err)
+		return nil, e.Wrap(ErrProcess, err)
 	}
 
-	err = viper.Unmarshal(cfg)
-	if err != nil {
-		return nil, ErrUnmarshal.Wrap(err)
-	}
-
-	return cfg, nil
+	return &cfg, nil
 }
