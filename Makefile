@@ -7,3 +7,6 @@ migrate_up:
 
 migrate_down:
 	$(migrate) down
+
+migrate_force:
+	$(migrate) force 1

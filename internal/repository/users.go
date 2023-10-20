@@ -2,13 +2,10 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	"github.com/jmoiron/sqlx"
 )
-
-const defaultTimeout = 60 * time.Second
 
 const insertUser = `
 INSERT INTO users(
@@ -40,9 +37,6 @@ func NewUsersRepo(db *sqlx.DB) *UsersRepository {
 
 // InsertUser will add a new unique user to the database using the provided data.
 func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error {
-	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
-	defer cancel()
-
 	_, err := r.db.
 		ExecContext(
 			ctx,
@@ -51,6 +45,5 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

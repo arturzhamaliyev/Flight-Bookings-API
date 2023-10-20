@@ -2,21 +2,25 @@ package service
 
 import (
 	"context"
-	"time"
+	"fmt"
+	"net/mail"
+	"strings"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UsersRepository represents a type that provides operations on storing users in database.
-type UsersRepository interface {
-	InsertUser(ctx context.Context, user model.User) error
-}
+type (
+	UsersRepository interface {
+		InsertUser(ctx context.Context, user model.User) error
+	}
 
-// Users represents a type that provides operations on users.
-type Users struct {
-	repo UsersRepository
-}
+	// Users represents a type that provides operations on users.
+	Users struct {
+		repo UsersRepository
+	}
+)
 
 // NewUsersService will instantiate a new instance of Users.
 func NewUsersService(repo UsersRepository) *Users {
@@ -26,17 +30,28 @@ func NewUsersService(repo UsersRepository) *Users {
 }
 
 // CreateUser will try to create a user in our database.
-func (u *Users) CreateUser(ctx context.Context, userReq model.CreateUserRequest) error {
-	user := model.User{
-		ID:        uuid.New(),
-		FirstName: userReq.FirstName,
-		LastName:  userReq.LastName,
-		Password:  userReq.Password,
-		Email:     userReq.Email,
-		Country:   userReq.Country,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+func (u *Users) CreateUser(ctx context.Context, user model.User) error {
+	_, err := mail.ParseAddress(user.Email)
+	if err != nil {
+		return fmt.Errorf("invalid email address: %w", err)
 	}
 
-	return u.repo.InsertUser(ctx, user)
+	user.Password, err = hashPassword(user.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	err = u.repo.InsertUser(ctx, user)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return fmt.Errorf("user already exists: %w", err)
+		}
+		return fmt.Errorf("couldn't create user: %w", err)
+	}
+	return nil
+}
+
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
