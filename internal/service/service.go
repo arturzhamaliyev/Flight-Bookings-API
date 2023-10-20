@@ -10,8 +10,8 @@ type Service struct {
 }
 
 // New creates a new Service with the given repository.
-func New(repo repository.Repository) Service {
+func New(usersRepo *repository.UsersRepository) Service {
 	return Service{
-		User: NewUsersService(repo.Users),
+		User: NewUsersService(usersRepo),
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/handler"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 
 	"github.com/jmoiron/sqlx"
@@ -30,7 +30,7 @@ func main() {
 	defer func() {
 		err := loggerDefault.Sync()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}()
 	logger := loggerDefault.Sugar()
@@ -54,14 +54,14 @@ func main() {
 	defer func() {
 		err := db.Close()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Info(err)
 		}
 	}()
 
 	// Instantiate and connect all our classes
-	repo := repository.New(db)
-	services := service.New(repo)
-	server := handler.New(cfg, services)
+	usersRepo := repository.NewUsersRepo(db)
+	services := service.New(usersRepo)
+	s := server.New(cfg, services)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -72,16 +72,18 @@ func main() {
 
 		ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-		err := server.Shutdown(ctx)
+		err := s.Shutdown(ctx)
 		if err != nil {
 			logger.Fatalf("failed to shutdown", err)
 		}
+
+		logger.Info("shutdown end")
 	}()
 
 	// Start listening for HTTP requests
-	err = server.ListenAndServe()
+	err = s.ListenAndServe()
 	if err != nil {
-		logger.Fatalf("failed to serve on port: %v", cfg.Port)
+		logger.Infof("failed to serve on port: %v due to: %v", cfg.Port, err)
 	}
 }
 

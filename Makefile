@@ -1,7 +1,7 @@
-run:
+run:	
 	go run cmd/main.go
 
-migrate := migrate -source file://migrations -database postgresql://postgres:passwd@localhost:5455/postgres?sslmode=disable
+migrate := migrate -source file://migrations -database ${DB_ADDR}
 migrate_up:
 	$(migrate) up
 

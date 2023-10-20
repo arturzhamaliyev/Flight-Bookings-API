@@ -12,6 +12,7 @@ const defaultTimeout = 60 * time.Second
 
 const insertUser = `
 INSERT INTO users(
+	id,
 	first_name,
 	last_name,
 	password,
@@ -21,7 +22,7 @@ INSERT INTO users(
 	updated_at
 )
 VALUES (
-	$1, $2, $3, $4, $5, $6, $7
+	$1, $2, $3, $4, $5, $6, $7, $8
 )
 `
 
@@ -46,7 +47,7 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 		ExecContext(
 			ctx,
 			insertUser,
-			user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
+			user.ID, user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
 	}

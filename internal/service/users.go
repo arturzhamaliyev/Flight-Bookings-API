@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/google/uuid"
 )
 
 // UsersRepository represents a type that provides operations on storing users in database.
@@ -25,9 +26,17 @@ func NewUsersService(repo UsersRepository) *Users {
 }
 
 // CreateUser will try to create a user in our database.
-func (u *Users) CreateUser(ctx context.Context, user model.User) error {
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = user.CreatedAt
+func (u *Users) CreateUser(ctx context.Context, userReq model.CreateUserRequest) error {
+	user := model.User{
+		ID:        uuid.New(),
+		FirstName: userReq.FirstName,
+		LastName:  userReq.LastName,
+		Password:  userReq.Password,
+		Email:     userReq.Email,
+		Country:   userReq.Country,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
 	return u.repo.InsertUser(ctx, user)
 }
