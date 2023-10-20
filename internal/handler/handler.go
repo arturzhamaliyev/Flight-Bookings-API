@@ -33,9 +33,9 @@ func New(cfg *config.Config, services service.Service) *http.Server {
 
 	v1 := r.Group("/v1")
 
-	user := v1.Group("/users")
+	users := v1.Group("/users")
 	{
-		user.POST("/", h.createUser)
+		users.POST("/", h.createUser)
 	}
 
 	return &http.Server{
