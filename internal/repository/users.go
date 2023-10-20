@@ -8,6 +8,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const defaultTimeout = 60 * time.Second
+
 const insertUser = `
 INSERT INTO users(
 	first_name,
@@ -37,7 +39,7 @@ func NewUsersRepo(db *sqlx.DB) *UsersRepository {
 
 // InsertUser will add a new unique user to the database using the provided data.
 func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
 	defer cancel()
 
 	_, err := r.db.
