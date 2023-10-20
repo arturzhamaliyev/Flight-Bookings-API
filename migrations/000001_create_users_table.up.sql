@@ -11,5 +11,3 @@ CREATE TABLE IF NOT EXISTS users(
     PRIMARY KEY (id),
     CONSTRAINT email_unique UNIQUE (email)
 );
-CREATE INDEX idx_users_email ON users (email);
-CREATE INDEX idx_users_country ON users (country);
