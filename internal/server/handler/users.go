@@ -38,7 +38,7 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 		UpdatedAt: time.Now(),
 	}
 
-	err = h.users.CreateUser(ctx, user)
+	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
 		zap.S().Infof("failed to create user: %v", err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)

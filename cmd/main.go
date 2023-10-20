@@ -10,6 +10,8 @@ import (
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/handler"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/router"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 
 	"github.com/jmoiron/sqlx"
@@ -60,8 +62,10 @@ func main() {
 
 	// Instantiate and connect all our classes
 	usersRepo := repository.NewUsersRepo(db)
-	services := service.New(usersRepo)
-	s := server.New(cfg, services)
+	usersService := service.NewUsersService(usersRepo)
+	handler := handler.New(usersService)
+	router := router.New(handler)
+	s := server.New(cfg, router)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

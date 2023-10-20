@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/mail"
-	"strings"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/repository"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -43,7 +45,8 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == repository.ErrDuplicateCode {
 			return fmt.Errorf("user already exists: %w", err)
 		}
 		return fmt.Errorf("couldn't create user: %w", err)
