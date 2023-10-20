@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const insertUser = `
+const insertUserQuery = `
 INSERT INTO users(
 	id,
 	first_name,
@@ -40,7 +40,7 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 	_, err := r.db.
 		ExecContext(
 			ctx,
-			insertUser,
+			insertUserQuery,
 			user.ID, user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
