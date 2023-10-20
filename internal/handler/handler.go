@@ -22,7 +22,7 @@ type Handler struct {
 }
 
 // New will instantiate a new instance of Server.
-func New(cfg *config.Config, services service.Service) *http.Server {
+func New(cfg config.Config, services service.Service) *http.Server {
 	h := &Handler{
 		users: services.User,
 	}

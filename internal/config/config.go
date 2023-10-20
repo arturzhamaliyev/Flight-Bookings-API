@@ -13,13 +13,13 @@ type Config struct {
 }
 
 // Load loads the configuration from the file.
-func Load() (*Config, error) {
+func Load() (Config, error) {
 	var cfg Config
 
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to process variables: %w", err)
+		return Config{}, fmt.Errorf("failed to process variables: %w", err)
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }

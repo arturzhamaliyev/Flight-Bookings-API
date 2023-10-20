@@ -85,7 +85,7 @@ func main() {
 	}
 }
 
-func initDatabase(ctx context.Context, logger *zap.SugaredLogger, cfg *config.Config) (*sqlx.DB, error) {
+func initDatabase(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("pgx", cfg.DBAddr)
 	if err != nil {
 		logger.Infof("failed connect to db: %v", err)
