@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/router"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/handler"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/router"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 
 	"github.com/jmoiron/sqlx"

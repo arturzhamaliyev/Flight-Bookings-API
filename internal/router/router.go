@@ -10,7 +10,7 @@ import (
 )
 
 // New will instantiate a new instance of Router.
-func NewRouter(h handler.Handler) *gin.Engine {
+func New(h handler.Handler) *gin.Engine {
 	r := gin.New()
 	r.Use(ginzap.Ginzap(zap.L(), time.RFC3339, true))
 	r.Use(ginzap.RecoveryWithZap(zap.L(), true))
