@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -41,6 +44,10 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 			insertUserQuery,
 			user.ID, user.Phone, user.Email, user.Password, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
+		var pgError *pgconn.PgError
+		if errors.As(err, &pgError) && pgError.Code == pgerrcode.UniqueViolation {
+			return ErrUniqueViolation
+		}
 		return err
 	}
 	return nil
