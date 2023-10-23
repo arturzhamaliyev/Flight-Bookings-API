@@ -23,7 +23,7 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 	var userReq request.CreateUser
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -38,7 +38,7 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 
 	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

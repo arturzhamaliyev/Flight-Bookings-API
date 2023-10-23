@@ -64,8 +64,7 @@ func main() {
 
 	// Instantiate and connect all our classes
 	usersRepo := repository.NewUsersRepo(db)
-	errRepo := repository.NewErrorsRepo()
-	usersService := service.NewUsersService(usersRepo, errRepo)
+	usersService := service.NewUsersService(usersRepo)
 	handler := handler.New(usersService)
 	router := router.New(handler)
 	s := server.New(cfg, router)

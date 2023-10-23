@@ -14,7 +14,6 @@ func New(h handler.Handler) *gin.Engine {
 	r := gin.New()
 	r.Use(ginzap.Ginzap(zap.L(), time.RFC3339, true))
 	r.Use(ginzap.RecoveryWithZap(zap.L(), true))
-	r.Use(h.ErrorHandler)
 
 	r.GET("/health", h.HealthCheck)
 
@@ -22,7 +21,7 @@ func New(h handler.Handler) *gin.Engine {
 
 	users := v1.Group("/users")
 	{
-		users.POST("/", h.CreateUser)
+		users.POST("", h.CreateUser)
 	}
 
 	return r

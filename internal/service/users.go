@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/mail"
+	"strings"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	"golang.org/x/crypto/bcrypt"
@@ -15,23 +16,16 @@ type (
 		InsertUser(ctx context.Context, user model.User) error
 	}
 
-	// DBError represents a type that provides errors that can occur in database.
-	DBError interface {
-		IsUniqueViolation(err error) bool
-	}
-
 	// Users represents a type that provides operations on users.
 	Users struct {
-		repo    UsersRepository
-		dbError DBError
+		repo UsersRepository
 	}
 )
 
 // NewUsersService will instantiate a new instance of Users.
-func NewUsersService(repo UsersRepository, err DBError) *Users {
+func NewUsersService(repo UsersRepository) *Users {
 	return &Users{
-		repo:    repo,
-		dbError: err,
+		repo: repo,
 	}
 }
 
@@ -49,7 +43,8 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
-		if u.dbError.IsUniqueViolation(err) {
+		// no way to check with error.Is()
+		if strings.Contains(err.Error(), ErrUniqueViolation.Error()) {
 			return fmt.Errorf("user already exists: %w", err)
 		}
 		return fmt.Errorf("couldn't create user: %w", err)
