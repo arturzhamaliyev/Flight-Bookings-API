@@ -2,32 +2,36 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/mail"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UsersRepository represents a type that provides operations on storing users in database.
 type (
+	// UsersRepository represents a type that provides operations on storing users in database.
 	UsersRepository interface {
 		InsertUser(ctx context.Context, user model.User) error
 	}
 
+	// DBError represents a type that provides errors that can occur in database.
+	DBError interface {
+		IsUniqueViolation(err error) bool
+	}
+
 	// Users represents a type that provides operations on users.
 	Users struct {
-		repo UsersRepository
+		repo    UsersRepository
+		dbError DBError
 	}
 )
 
 // NewUsersService will instantiate a new instance of Users.
-func NewUsersService(repo UsersRepository) *Users {
+func NewUsersService(repo UsersRepository, err DBError) *Users {
 	return &Users{
-		repo: repo,
+		repo:    repo,
+		dbError: err,
 	}
 }
 
@@ -45,8 +49,7 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+		if u.dbError.IsUniqueViolation(err) {
 			return fmt.Errorf("user already exists: %w", err)
 		}
 		return fmt.Errorf("couldn't create user: %w", err)

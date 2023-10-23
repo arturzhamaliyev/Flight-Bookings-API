@@ -22,7 +22,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-const shutdownTime = 60 * time.Second
+const shutdownTime = time.Minute
 
 func main() {
 	// Create new Logger instance with default production logging configuration.
@@ -64,7 +64,8 @@ func main() {
 
 	// Instantiate and connect all our classes
 	usersRepo := repository.NewUsersRepo(db)
-	usersService := service.NewUsersService(usersRepo)
+	errRepo := repository.NewErrorsRepo()
+	usersService := service.NewUsersService(usersRepo, errRepo)
 	handler := handler.New(usersService)
 	router := router.New(handler)
 	s := server.New(cfg, router)
