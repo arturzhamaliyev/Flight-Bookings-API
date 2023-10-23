@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler represents a HTTP server handler that can handle requests for this service.
+// Handler represents a HTTP server handler that can handle requests for flight bookings.
 type Handler struct {
 	usersService Users
 }
@@ -19,6 +19,8 @@ func New(usersService *service.Users) Handler {
 	}
 }
 
+// HealthCheck will response with OK status if server is listening for incoming requests.
+// Will replace with Swagger soon.
 func (h *Handler) HealthCheck(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusOK)
+	ctx.Status(http.StatusOK)
 }

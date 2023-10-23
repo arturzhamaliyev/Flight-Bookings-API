@@ -10,16 +10,14 @@ import (
 const insertUserQuery = `
 INSERT INTO users(
 	id,
-	first_name,
-	last_name,
-	password,
+	phone,
 	email,
-	country,
+	password,
 	created_at,
 	updated_at
 )
 VALUES (
-	$1, $2, $3, $4, $5, $6, $7, $8
+	$1, $2, $3, $4, $5, $6
 )
 `
 
@@ -41,7 +39,7 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 		ExecContext(
 			ctx,
 			insertUserQuery,
-			user.ID, user.FirstName, user.LastName, user.Password, user.Email, user.Country, user.CreatedAt, user.UpdatedAt)
+			user.ID, user.Phone, user.Email, user.Password, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return err
 	}

@@ -8,12 +8,10 @@ import (
 
 // User represents a person using this service.
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-	Country   string    `json:"country"`
-	CreatedAt time.Time `json:"createAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        uuid.UUID
+	Phone     *string
+	Email     string
+	Password  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

@@ -8,5 +8,6 @@ migrate_up:
 migrate_down:
 	$(migrate) down
 
-migrate_force:
-	$(migrate) force 1
+migration_version := 1
+migrate_fix:
+	$(migrate) force $(migration_version)

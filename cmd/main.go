@@ -22,6 +22,8 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+const shutdownTime = 60 * time.Second
+
 func main() {
 	// Create new Logger instance with default production logging configuration.
 	loggerDefault, err := zap.NewProduction()
@@ -74,11 +76,11 @@ func main() {
 		<-c
 		logger.Info("shutdown start")
 
-		ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, shutdownTime)
 		defer cancel()
 		err := s.Shutdown(ctx)
 		if err != nil {
-			logger.Fatalf("failed to shutdown", err)
+			logger.Infof("failed to shutdown: %v", err)
 		}
 
 		logger.Info("shutdown end")

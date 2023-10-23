@@ -1,17 +1,20 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
-	"github.com/gin-gonic/gin"
 )
 
+// Router represents a type that provides operations on serving HTTP.
+type Router interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+}
+
 // New will instantiate a new instance of Server.
-func New(cfg config.Config, r *gin.Engine) *http.Server {
+func New(cfg config.Config, r Router) *http.Server {
 	return &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Port),
+		Addr:    ":" + cfg.Port,
 		Handler: r,
 	}
 }
