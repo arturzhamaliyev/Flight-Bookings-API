@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -46,7 +47,7 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 	if err != nil {
 		var pgError *pgconn.PgError
 		if errors.As(err, &pgError) && pgError.Code == pgerrcode.UniqueViolation {
-			return ErrUniqueViolation
+			return customErrors.ErrUniqueViolation
 		}
 		return err
 	}

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/mail"
 
+	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
+
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,7 +45,7 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
-		if errors.Is(err, ErrUniqueViolation) {
+		if errors.Is(err, customErrors.ErrUniqueViolation) {
 			return fmt.Errorf("user already exists: %w", err)
 		}
 		return fmt.Errorf("couldn't create user: %w", err)
