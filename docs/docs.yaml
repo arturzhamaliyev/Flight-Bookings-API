@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: Flight-Booking API
+  description: API for managing customers and booking flight tickets
+  version: 0.0.1
+servers:
+  - url: "{protocol}://{domain}:{port}/{basePath}"
+    variables:
+      protocol:
+        enum:
+          - "http"
+          - "https"
+        default: "http"
+      domain:
+        default: "localhost"
+      port:
+        default: "8080"
+      basePath:
+        default: "api/v1"
+paths:
+  /users:
+    post:
+      summary: Create new user
+      tags:
+        - user
+      description: create user
+      requestBody:
+        description: User data to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    BadRequest:
+      description: The client side error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: The server side error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: The user's email address.
+        password:
+          type: string
+          description: The user's password.
+        phone:
+          type: string
+          description: The user's phone number.
+    CreateUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The user's id.
+        phone:
+          type: string
+          description: The user's phone number.
+        email:
+          type: string
+          format: email
+          description: The user's email address.
+    Error:
+      type: object
+      required:
+          - code
+          - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+tags:
+  - name: user
+    description: Endpoints interacting with users.
