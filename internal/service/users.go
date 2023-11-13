@@ -35,7 +35,7 @@ func NewUsersService(repo UsersRepository) *Users {
 func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
-		return fmt.Errorf("invalid email address: %w", err)
+		return errors.Join(ErrInvalidEmailAddress, err)
 	}
 
 	user.Password, err = hashPassword(user.Password)
@@ -46,7 +46,7 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, customErrors.ErrUniqueViolation) {
-			return fmt.Errorf("user already exists: %w", err)
+			return errors.Join(ErrUserExists, err)
 		}
 		return fmt.Errorf("couldn't create user: %w", err)
 	}
