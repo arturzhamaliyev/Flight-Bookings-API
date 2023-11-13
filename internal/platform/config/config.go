@@ -11,7 +11,7 @@ type (
 	Config struct {
 		Server   Server
 		Postgres Postgres
-		Swagger
+		Swagger  Swagger
 	}
 
 	Swagger struct {
