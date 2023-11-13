@@ -12,6 +12,7 @@ import (
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/router"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/handler"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/swagger"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 
 	"github.com/jmoiron/sqlx"
@@ -66,6 +67,9 @@ func main() {
 	handler := handler.New(usersService)
 	router := router.New(handler)
 	s := server.New(cfg, router)
+	go func() {
+		swagger.New(cfg)
+	}()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)

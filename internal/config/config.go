@@ -8,8 +8,9 @@ import (
 
 // Config represents the configuration of our application.
 type Config struct {
-	Port   string `default:"8080"`
-	DBAddr string `split_words:"true"`
+	SwaggerPort string `default:"8081"`
+	Port        string `default:"8080"`
+	DBAddr      string `split_words:"true"`
 }
 
 // Load loads the configuration from the file.
