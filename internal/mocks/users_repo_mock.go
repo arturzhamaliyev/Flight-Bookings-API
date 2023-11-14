@@ -9,20 +9,20 @@ import (
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 )
 
-// UserMockRepository mock struct
-type UserMockRepository struct {
+// UsersRepositoryMock mock struct
+type UsersRepositoryMock struct {
 	db map[uuid.UUID]model.User
 }
 
-// NewUsersMockRepo mock construct
-func NewUsersMockRepo() *UserMockRepository {
-	return &UserMockRepository{
+// NewUsersRepoMock mock construct
+func NewUsersRepoMock() *UsersRepositoryMock {
+	return &UsersRepositoryMock{
 		db: make(map[uuid.UUID]model.User),
 	}
 }
 
 // InsertUser mock method
-func (r *UserMockRepository) InsertUser(ctx context.Context, user model.User) error {
+func (r *UsersRepositoryMock) InsertUser(ctx context.Context, user model.User) error {
 	for _, u := range r.db {
 		if u.Email == user.Email {
 			return service.ErrUserExists

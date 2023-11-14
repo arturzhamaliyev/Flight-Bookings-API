@@ -17,56 +17,68 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
+	ctx := context.Background()
+
 	testCases := []struct {
-		name          string
-		user          model.User
-		expectedError error
+		name            string
+		prepareDataFunc func() (*service.Users, model.User)
+		expectedError   error
 	}{
 		{
 			name: "valid",
-			user: model.User{
-				ID:        uuid.New(),
-				Phone:     convert.StringToAddr("87718665797"),
-				Email:     "artur.zhamaliev@gmail.com",
-				Password:  "password",
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+			prepareDataFunc: func() (*service.Users, model.User) {
+				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
+					ID:        uuid.New(),
+					Phone:     convert.StringToAddr("87718665797"),
+					Email:     "artur.zhamaliev@gmail.com",
+					Password:  "password",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}
 			},
 			expectedError: nil,
 		},
 		{
 			name: "invalid email address",
-			user: model.User{
-				ID:        uuid.New(),
-				Phone:     convert.StringToAddr("87718665797"),
-				Email:     "wrong address",
-				Password:  "password",
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+			prepareDataFunc: func() (*service.Users, model.User) {
+				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
+					ID:        uuid.New(),
+					Phone:     convert.StringToAddr("87718665797"),
+					Email:     "wrong address",
+					Password:  "password",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}
 			},
 			expectedError: service.ErrInvalidEmailAddress,
 		},
 		{
 			name: "user already exists",
-			user: model.User{
-				ID:        uuid.New(),
-				Phone:     convert.StringToAddr("87718665797"),
-				Email:     "artur.zhamaliev@gmail.com",
-				Password:  "password",
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+			prepareDataFunc: func() (*service.Users, model.User) {
+				usersRepo := mocks.NewUsersRepoMock()
+				usersService := service.NewUsersService(usersRepo)
+
+				userEmail := "artur.zhamaliev@gmail.com"
+				usersRepo.InsertUser(ctx, model.User{Email: userEmail})
+
+				return usersService, model.User{
+					ID:        uuid.New(),
+					Phone:     convert.StringToAddr("87718665797"),
+					Email:     userEmail,
+					Password:  "password",
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}
 			},
 			expectedError: service.ErrUserExists,
 		},
 	}
 
-	ctx := context.Background()
-	usersRepo := mocks.NewUsersMockRepo()
-	usersService := service.NewUsersService(usersRepo)
-
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := usersService.CreateUser(ctx, tc.user)
+			usersService, user := tc.prepareDataFunc()
+
+			err := usersService.CreateUser(ctx, user)
 			if !errors.Is(err, tc.expectedError) {
 				t.Error(err)
 			}
