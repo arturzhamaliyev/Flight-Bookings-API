@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/mocks"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
@@ -80,7 +81,7 @@ func TestCreateUser(t *testing.T) {
 
 			err := usersService.CreateUser(ctx, user)
 			if !errors.Is(err, tc.expectedError) {
-				t.Error(err)
+				require.NoError(t, err)
 			}
 		})
 	}
