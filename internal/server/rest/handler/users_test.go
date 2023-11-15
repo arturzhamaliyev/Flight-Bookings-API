@@ -24,7 +24,7 @@ func TestCreateUser(t *testing.T) {
 		requestBody      any
 		expectedResponse struct {
 			code int
-			obj  response.CreateUser
+			obj  any
 		}
 	}{
 		{
@@ -36,7 +36,7 @@ func TestCreateUser(t *testing.T) {
 			},
 			expectedResponse: struct {
 				code int
-				obj  response.CreateUser
+				obj  any
 			}{
 				code: http.StatusCreated,
 				obj: response.CreateUser{
@@ -45,11 +45,20 @@ func TestCreateUser(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:        "invalid request body",
+			requestBody: "invalid body",
+			expectedResponse: struct {
+				code int
+				obj  any
+			}{
+				code: http.StatusBadRequest,
+				obj:  nil,
+			},
+		},
 	}
 
-	usersService := mocks.NewUsersServiceMock()
-	handler := handler.New(usersService)
-	router := rest.New(handler)
+	router := rest.New(handler.New(mocks.NewUsersServiceMock()))
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -64,12 +73,16 @@ func TestCreateUser(t *testing.T) {
 			router.ServeHTTP(rec, req)
 			require.Equal(t, tc.expectedResponse.code, rec.Code)
 
+			if rec.Code != http.StatusCreated {
+				return
+			}
+
 			var respObj response.CreateUser
 			err = json.NewDecoder(rec.Body).Decode(&respObj)
 			require.NoError(t, err, "error on decoding response object")
 
-			require.Equal(t, tc.expectedResponse.obj.Email, respObj.Email)
-			require.Equal(t, tc.expectedResponse.obj.Phone, respObj.Phone)
+			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Email, respObj.Email)
+			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Phone, respObj.Phone)
 		})
 	}
 }
