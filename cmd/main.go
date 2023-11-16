@@ -8,19 +8,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/config"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/router"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/handler"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/swagger"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
-
-	"github.com/jmoiron/sqlx"
-
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/repository"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/config"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/db/driver"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/repository"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/swagger"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 )
 
 func main() {
@@ -50,7 +48,7 @@ func main() {
 	defer cancel()
 
 	// Connect to the postgres DB
-	db, err := initDatabase(ctx, logger, cfg)
+	db, err := driver.ConnectPostgres(ctx, logger, cfg)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -65,7 +63,7 @@ func main() {
 	usersRepo := repository.NewUsersRepo(db)
 	usersService := service.NewUsersService(usersRepo)
 	handler := handler.New(usersService)
-	router := router.New(handler)
+	router := rest.New(handler)
 	s := server.New(cfg, router)
 	go func() {
 		swagger.New(cfg)
@@ -89,17 +87,9 @@ func main() {
 	}()
 
 	// Start listening for HTTP requests
+	logger.Infof("server listening on port: %v", cfg.Server)
 	err = s.ListenAndServe()
 	if err != nil {
-		logger.Infof("failed to serve on port: %v due to: %v", cfg.Port, err)
+		logger.Infof("failed to serve on port: %v due to: %v", cfg.Server.Port, err)
 	}
-}
-
-func initDatabase(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("pgx", cfg.DBAddr)
-	if err != nil {
-		logger.Infof("failed connect to db: %v", err)
-		return nil, err
-	}
-	return db, nil
 }

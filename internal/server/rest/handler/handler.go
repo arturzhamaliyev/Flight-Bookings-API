@@ -3,8 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 	"github.com/gin-gonic/gin"
+
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 )
 
 // Handler represents a HTTP server handler that can handle requests for flight bookings.

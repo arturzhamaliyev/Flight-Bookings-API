@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model/request"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model/response"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/request"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/response"
 )
 
 // Users represents a type that provides operations on users.
@@ -18,7 +19,6 @@ type Users interface {
 }
 
 // CreateUserss will try to create user, responses with Created status and Created user info if no error occured.
-// Will replace with Swagger soon.
 func (h *Handler) CreateUser(ctx *gin.Context) {
 	var userReq request.CreateUser
 	err := ctx.ShouldBindJSON(&userReq)
@@ -42,9 +42,11 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, response.CreateUser{
+	resp := response.CreateUser{
 		ID:    user.ID,
 		Phone: user.Phone,
 		Email: user.Email,
-	})
+	}
+
+	ctx.JSON(http.StatusCreated, resp)
 }

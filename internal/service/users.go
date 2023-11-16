@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/mail"
 
-	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"golang.org/x/crypto/bcrypt"
+	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/errors"
 )
 
 type (
@@ -53,6 +53,7 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 	return nil
 }
 
+// hashPassword generates and returns bcrypt hash from the given password.
 func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err

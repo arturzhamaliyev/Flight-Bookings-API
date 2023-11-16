@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 
-	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/errors"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/errors"
 )
 
 const insertUserQuery = `
