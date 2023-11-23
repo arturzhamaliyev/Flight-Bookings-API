@@ -13,8 +13,8 @@ import (
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/response"
 )
 
-// Users represents a type that provides operations on users.
-type Users interface {
+// UsersService represents a type that provides operations on users.
+type UsersService interface {
 	CreateUser(ctx context.Context, user model.User) error
 }
 

@@ -1,4 +1,4 @@
-run:	
+run:
 	@go run cmd/main.go
 
 migrate := migrate -source file://migrations -database ${DATABASE_URL}
@@ -11,3 +11,7 @@ migrate_down:
 migration_version := 1
 migrate_fix:
 	@$(migrate) force $(migration_version)
+
+
+test:
+	@go test -v -cover -tags=unit ./...
