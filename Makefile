@@ -13,5 +13,8 @@ migrate_fix:
 	@$(migrate) force $(migration_version)
 
 
-test:
+test_unit:
 	@go test -v -cover -tags=unit ./...
+
+test_integration:
+	@go test -v -cover -tags=integration ./...
