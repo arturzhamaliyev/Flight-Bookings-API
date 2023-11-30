@@ -2,5 +2,9 @@ package errors
 
 import "errors"
 
-// ErrUniqueViolation is returned when the data already exists.
-var ErrUniqueViolation = errors.New("duplicate key value violates unique constraint")
+var (
+	// ErrUniqueViolation is returned when the data already exists.
+	ErrUniqueViolation = errors.New("duplicate key value violates unique constraint")
+	// ErrNoRows is returned when no data found.
+	ErrNoRows = errors.New("no rows in result set")
+)

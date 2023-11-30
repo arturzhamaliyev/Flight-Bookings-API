@@ -24,7 +24,8 @@ func New(h handler.Handler) *gin.Engine {
 
 	users := v1.Group("/users")
 	{
-		users.POST("", h.CreateUser)
+		users.POST("/sign-up", h.SignUp)
+		users.POST("/sign-in", h.SignIn)
 	}
 
 	return r

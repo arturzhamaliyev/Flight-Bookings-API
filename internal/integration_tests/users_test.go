@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 	ctx := context.Background()
 	usersRepo := repository.NewUsersRepo(db)
 	usersService := service.NewUsersService(usersRepo)
-	router := rest.New(handler.New(usersService))
+	router := rest.New(handler.New(usersService, nil))
 
 	testCases := []struct {
 		name             string
@@ -49,7 +49,7 @@ func TestCreateUser(t *testing.T) {
 				obj  any
 			}{
 				code: http.StatusCreated,
-				obj: response.CreateUser{
+				obj: response.SignUp{
 					Phone: convert.StringToAddr("87718665797"),
 					Email: "artur.zhamaliev@gmail.com",
 				},
@@ -124,12 +124,12 @@ func TestCreateUser(t *testing.T) {
 				return
 			}
 
-			var respObj response.CreateUser
+			var respObj response.SignUp
 			err = json.NewDecoder(rec.Body).Decode(&respObj)
 			require.NoError(t, err, "error on decoding response object")
 
-			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Email, respObj.Email)
-			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Phone, respObj.Phone)
+			require.Equal(t, tc.expectedResponse.obj.(response.SignUp).Email, respObj.Email)
+			require.Equal(t, tc.expectedResponse.obj.(response.SignUp).Phone, respObj.Phone)
 		})
 	}
 }

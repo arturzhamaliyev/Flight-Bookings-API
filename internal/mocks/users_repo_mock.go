@@ -31,3 +31,8 @@ func (r *UsersRepositoryMock) InsertUser(ctx context.Context, user model.User) e
 	r.db[user.ID] = user
 	return nil
 }
+
+// GetUserByEmail mock method
+func (r *UsersRepositoryMock) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
+	return model.User{}, nil
+}

@@ -39,7 +39,7 @@ func TestCreateUser(t *testing.T) {
 				obj  any
 			}{
 				code: http.StatusCreated,
-				obj: response.CreateUser{
+				obj: response.SignUp{
 					Phone: convert.StringToAddr("87718665797"),
 					Email: "artur.zhamaliev@gmail.com",
 				},
@@ -58,7 +58,7 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	router := rest.New(handler.New(mocks.NewUsersServiceMock()))
+	router := rest.New(handler.New(mocks.NewUsersServiceMock(), nil))
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -77,12 +77,12 @@ func TestCreateUser(t *testing.T) {
 				return
 			}
 
-			var respObj response.CreateUser
+			var respObj response.SignUp
 			err = json.NewDecoder(rec.Body).Decode(&respObj)
 			require.NoError(t, err, "error on decoding response object")
 
-			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Email, respObj.Email)
-			require.Equal(t, tc.expectedResponse.obj.(response.CreateUser).Phone, respObj.Phone)
+			require.Equal(t, tc.expectedResponse.obj.(response.SignUp).Email, respObj.Email)
+			require.Equal(t, tc.expectedResponse.obj.(response.SignUp).Phone, respObj.Phone)
 		})
 	}
 }
