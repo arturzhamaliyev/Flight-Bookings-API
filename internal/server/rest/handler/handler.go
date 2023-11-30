@@ -3,19 +3,20 @@ package handler
 import (
 	"net/http"
 
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 // Handler represents a HTTP server handler that can handle requests for flight bookings.
 type Handler struct {
-	usersService Users
+	usersService   UsersService
+	sessionService SessionService
 }
 
 // New will instantiate a new instance of Handler.
-func New(usersService *service.Users) Handler {
+func New(usersService UsersService, sessionService SessionService) Handler {
 	return Handler{
-		usersService: usersService,
+		usersService:   usersService,
+		sessionService: sessionService,
 	}
 }
 
