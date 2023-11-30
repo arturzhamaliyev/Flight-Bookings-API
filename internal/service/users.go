@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/mail"
 
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
@@ -16,6 +17,7 @@ type (
 	// UsersRepository represents a type that provides operations on storing users in database.
 	UsersRepository interface {
 		InsertUser(ctx context.Context, user model.User) error
+		GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	}
 
 	// Users represents a type that provides operations on users.
@@ -51,6 +53,21 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 		return fmt.Errorf("couldn't create user: %w", err)
 	}
 	return nil
+}
+
+// CheckUserCredentials
+func (u *Users) CheckUserCredentials(ctx context.Context, email, password string) error {
+	user, err := u.repo.GetUserByEmail(ctx, email)
+	if err != nil || !comparePassword(user.Password, password) {
+		zap.S().Infof("error in check user creds: %v", err)
+		return ErrInvalidEmailOrPassword
+	}
+	return nil
+}
+
+// comparePassword compares hashed password of user with given password.
+func comparePassword(hashedPassword, password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) == nil
 }
 
 // hashPassword generates and returns bcrypt hash from the given password.

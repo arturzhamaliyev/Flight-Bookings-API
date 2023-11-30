@@ -16,11 +16,17 @@ import (
 // UsersService represents a type that provides operations on users.
 type UsersService interface {
 	CreateUser(ctx context.Context, user model.User) error
+	CheckUserCredentials(ctx context.Context, email, password string) error
 }
 
-// CreateUserss will try to create user, responses with Created status and Created user info if no error occured.
-func (h *Handler) CreateUser(ctx *gin.Context) {
-	var userReq request.CreateUser
+type SessionService interface {
+	GenerateToken(email string) (string, error)
+	ValidateToken(signedToken string) (*model.Claims, error)
+}
+
+// SignUp will try to create user, responses with Created status and Created user info if no error occured.
+func (h *Handler) SignUp(ctx *gin.Context) {
+	var userReq request.SignUp
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -42,11 +48,39 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	resp := response.CreateUser{
+	resp := response.SignUp{
 		ID:    user.ID,
 		Phone: user.Phone,
 		Email: user.Email,
 	}
 
 	ctx.JSON(http.StatusCreated, resp)
+}
+
+// SignIn
+func (h *Handler) SignIn(ctx *gin.Context) {
+	var userReq request.SignIn
+	err := ctx.ShouldBindJSON(&userReq)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.usersService.CheckUserCredentials(ctx, userReq.Email, userReq.Password)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := h.sessionService.GenerateToken(userReq.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp := response.SignIn{
+		Token: token,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }
