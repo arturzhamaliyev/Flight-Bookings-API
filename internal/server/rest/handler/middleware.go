@@ -2,45 +2,65 @@ package handler
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"go.uber.org/zap"
+
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 )
 
-func (h *Handler) IdempotencyCheck(ctx *gin.Context) {
-	guid := ctx.GetHeader("X-Idempotency-Key")
-	_, err := uuid.Parse(guid)
+func (h *Handler) JWTAuthAdmin(ctx *gin.Context) {
+	token, err := helper.GetToken(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(ErrAuthRequired))
+		ctx.Abort()
+		return
+	}
+
+	err = helper.ValidateToken(token)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		ctx.Abort()
+		return
+	}
+
+	err = helper.ValidateAdminRole(token)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAdminOnly))
+		ctx.Abort()
 		return
 	}
 
 	ctx.Next()
 }
 
-func (h *Handler) Auth(ctx *gin.Context) {
-	clientToken := ctx.Request.Header.Get("Authorization")
-	if clientToken == "" {
-		ctx.JSON(http.StatusForbidden, gin.H{"error": "no Authorization header provided"})
-		return
-	}
-
-	extractedToken := strings.Split(clientToken, "Bearer ")
-	if len(extractedToken) == 2 {
-		clientToken = strings.TrimSpace(extractedToken[1])
-	} else {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid format of Authorization Token"})
-		return
-	}
-
-	claims, err := h.sessionService.ValidateToken(clientToken)
+func (h *Handler) JWTAuthCustomer(ctx *gin.Context) {
+	token, err := helper.GetToken(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(ErrAuthRequired))
+		ctx.Abort()
 		return
 	}
 
-	ctx.Set("email", claims.UserEmail)
+	err = helper.ValidateToken(token)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		ctx.Abort()
+		return
+	}
+
+	err = helper.ValidateCustomerRole(token)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrCustomerOnly))
+		ctx.Abort()
+		return
+	}
 
 	ctx.Next()
 }

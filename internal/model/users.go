@@ -9,6 +9,7 @@ import (
 // User represents a person using this service.
 type User struct {
 	ID        uuid.UUID
+	Role      Role
 	Phone     *string
 	Email     string
 	Password  string

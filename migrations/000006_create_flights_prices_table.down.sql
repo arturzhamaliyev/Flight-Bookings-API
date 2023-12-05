@@ -1,1 +1,1 @@
--- DROP TABLE IF EXISTS flights_prices;
+DROP TABLE IF EXISTS flights_prices;
