@@ -62,8 +62,7 @@ func main() {
 	// Instantiate and connect all our classes
 	usersRepo := repository.NewUsersRepo(db)
 	usersService := service.NewUsersService(usersRepo)
-	sessionService := service.NewSessionService("secret", 10*time.Minute)
-	handler := handler.New(usersService, sessionService)
+	handler := handler.New(usersService)
 	router := rest.New(handler)
 	s := server.New(cfg, router)
 	go func() {

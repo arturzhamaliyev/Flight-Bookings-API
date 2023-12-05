@@ -7,21 +7,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/request"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/response"
 )
 
 // UsersService represents a type that provides operations on users.
 type UsersService interface {
+	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	CreateUser(ctx context.Context, user model.User) error
-	CheckUserCredentials(ctx context.Context, email, password string) error
-}
-
-type SessionService interface {
-	GenerateToken(email string) (string, error)
-	ValidateToken(signedToken string) (*model.Claims, error)
+	ValidateUserPassword(hashedPassword, password string) error
 }
 
 // SignUp will try to create user, responses with Created status and Created user info if no error occured.
@@ -29,12 +27,14 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 	var userReq request.SignUp
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
 		return
 	}
 
 	user := model.User{
 		ID:        uuid.New(),
+		Role:      model.Customer,
 		Phone:     userReq.Phone,
 		Email:     userReq.Email,
 		Password:  userReq.Password,
@@ -44,7 +44,8 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 
 	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
 		return
 	}
 
@@ -62,25 +63,43 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	var userReq request.SignIn
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
 		return
 	}
 
-	err = h.usersService.CheckUserCredentials(ctx, userReq.Email, userReq.Password)
+	user, err := h.usersService.GetUserByEmail(ctx, userReq.Email)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrInvalidEmailOrPassword))
 		return
 	}
 
-	token, err := h.sessionService.GenerateToken(userReq.Email)
+	err = h.usersService.ValidateUserPassword(user.Password, userReq.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrInvalidEmailOrPassword))
 		return
 	}
 
-	resp := response.SignIn{
-		Token: token,
+	token, err := helper.GenerateToken(user)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		return
 	}
 
-	ctx.JSON(http.StatusOK, resp)
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:    "token",
+		Value:   token,
+		Expires: time.Now().Add(model.ExpirationDuration),
+	})
+}
+
+// SignOut
+func (h *Handler) SignOut(ctx *gin.Context) {
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:   "token",
+		MaxAge: -1,
+	})
 }

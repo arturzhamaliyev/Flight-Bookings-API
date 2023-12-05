@@ -26,6 +26,7 @@ func New(h handler.Handler) *gin.Engine {
 	{
 		users.POST("/sign-up", h.SignUp)
 		users.POST("/sign-in", h.SignIn)
+		users.POST("/sign-out", h.SignOut)
 	}
 
 	return r

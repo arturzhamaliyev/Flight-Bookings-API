@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/mocks"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/convert"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/response"
@@ -40,7 +40,7 @@ func TestCreateUser(t *testing.T) {
 			}{
 				code: http.StatusCreated,
 				obj: response.SignUp{
-					Phone: convert.StringToAddr("87718665797"),
+					Phone: helper.StringToAddr("87718665797"),
 					Email: "artur.zhamaliev@gmail.com",
 				},
 			},
@@ -58,7 +58,7 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	router := rest.New(handler.New(mocks.NewUsersServiceMock(), nil))
+	router := rest.New(handler.New(mocks.NewUsersServiceMock()))
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

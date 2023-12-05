@@ -8,3 +8,5 @@ services:
       POSTGRES_PASSWORD: "passwd"
     ports:
       - "5432:5432"
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data

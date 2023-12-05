@@ -1,1 +1,1 @@
--- DROP TABLE IF EXISTS ranks;
+DROP TABLE IF EXISTS ranks;

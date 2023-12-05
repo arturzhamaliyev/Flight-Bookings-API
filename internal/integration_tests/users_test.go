@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/convert"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/repository"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler"
@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 	ctx := context.Background()
 	usersRepo := repository.NewUsersRepo(db)
 	usersService := service.NewUsersService(usersRepo)
-	router := rest.New(handler.New(usersService, nil))
+	router := rest.New(handler.New(usersService))
 
 	testCases := []struct {
 		name             string
@@ -50,7 +50,7 @@ func TestCreateUser(t *testing.T) {
 			}{
 				code: http.StatusCreated,
 				obj: response.SignUp{
-					Phone: convert.StringToAddr("87718665797"),
+					Phone: helper.StringToAddr("87718665797"),
 					Email: "artur.zhamaliev@gmail.com",
 				},
 			},
