@@ -27,6 +27,8 @@ func New(h handler.Handler) *gin.Engine {
 		users.POST("/sign-up", h.SignUp)
 		users.POST("/sign-in", h.SignIn)
 		users.POST("/sign-out", h.SignOut)
+
+		users.PUT("/update-profile", h.JWTAuthCustomer, h.UpdateProfile)
 	}
 
 	return r

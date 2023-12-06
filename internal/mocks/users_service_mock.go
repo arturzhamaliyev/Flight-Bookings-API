@@ -28,3 +28,8 @@ func (u *UsersServiceMock) CreateUser(ctx context.Context, user model.User) erro
 func (u *UsersServiceMock) ValidateUserPassword(hashedPassword, password string) error {
 	return nil
 }
+
+// UpdateUser
+func (u *UsersServiceMock) UpdateUser(ctx context.Context, user model.User) error {
+	return nil
+}

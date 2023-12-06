@@ -13,21 +13,21 @@ import (
 	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/errors"
 )
 
-func GetCurrentUserIDFromToken(ctx *gin.Context) (string, error) {
+func GetCurrentUserIDFromToken(ctx *gin.Context) (uuid.UUID, error) {
 	token, err := GetToken(ctx)
 	if err != nil {
-		return "", err
+		return uuid.UUID{}, err
 	}
 
 	err = ValidateToken(token)
 	if err != nil {
-		return "", err
+		return uuid.UUID{}, err
 	}
 
 	claims, _ := token.Claims.(jwt.MapClaims)
-	userID := claims["id"].(uuid.UUID).String()
+	userID := claims["id"].(string)
 
-	return userID, nil
+	return uuid.Parse(userID)
 }
 
 func GenerateToken(user model.User) (string, error) {
@@ -56,7 +56,7 @@ func ValidateToken(token *jwt.Token) error {
 func ValidateAdminRole(token *jwt.Token) error {
 	var role model.Role
 	claims, ok := token.Claims.(jwt.MapClaims)
-	userRole := claims[role.String()].(model.Role)
+	userRole := model.Role(claims[role.String()].(float64))
 	if ok && token.Valid && userRole == model.Admin {
 		return nil
 	}
@@ -66,8 +66,8 @@ func ValidateAdminRole(token *jwt.Token) error {
 func ValidateCustomerRole(token *jwt.Token) error {
 	var role model.Role
 	claims, ok := token.Claims.(jwt.MapClaims)
-	userRole := claims[role.String()].(model.Role)
-	if ok && token.Valid && (userRole == model.Customer || userRole == model.Admin) {
+	userRole := model.Role(claims[role.String()].(float64))
+	if ok && token.Valid && userRole == model.Customer {
 		return nil
 	}
 	return customErrors.ErrNotCustomer
@@ -78,7 +78,7 @@ func GetToken(ctx *gin.Context) (*jwt.Token, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
-		return model.SecretKey, nil
+		return []byte(model.SecretKey), nil
 	})
 }
 
