@@ -7,10 +7,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/errors"
 )
+
+func GetCurrentUserIDFromToken(ctx *gin.Context) (string, error) {
+	token, err := GetToken(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	err = ValidateToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	claims, _ := token.Claims.(jwt.MapClaims)
+	userID := claims["id"].(uuid.UUID).String()
+
+	return userID, nil
+}
 
 func GenerateToken(user model.User) (string, error) {
 	var role model.Role
@@ -28,7 +46,7 @@ func GenerateToken(user model.User) (string, error) {
 }
 
 func ValidateToken(token *jwt.Token) error {
-	_, ok := token.Claims.(*model.Claims)
+	_, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		return nil
 	}
