@@ -3,7 +3,7 @@ package service
 import "errors"
 
 var (
-	ErrInvalidEmailAddress    = errors.New("invalid email address")
-	ErrUserExists             = errors.New("user already exists")
-	ErrInvalidEmailOrPassword = errors.New("invalid email or password")
+	ErrInvalidEmailAddress = errors.New("invalid email address")
+	ErrInvalidPassword     = errors.New("invalid password")
+	ErrUserExists          = errors.New("user already exists")
 )

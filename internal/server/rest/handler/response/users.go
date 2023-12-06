@@ -10,8 +10,3 @@ type SignUp struct {
 	Phone *string   `json:"phone,omitempty"`
 	Email string    `json:"email"`
 }
-
-// SignIn
-type SignIn struct {
-	Token string `json:"token"`
-}

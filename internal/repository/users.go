@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
 	customErrors "github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/errors"
@@ -16,6 +17,7 @@ const (
 	insertUserQuery = `
 		INSERT INTO users(
 			id,
+			role,
 			phone,
 			email,
 			password,
@@ -23,7 +25,7 @@ const (
 			updated_at
 		)
 		VALUES (
-			$1, $2, $3, $4, $5, $6
+			$1, $2, $3, $4, $5, $6, $7
 		)
 	`
 
@@ -52,13 +54,21 @@ func (r *UsersRepository) InsertUser(ctx context.Context, user model.User) error
 		ExecContext(
 			ctx,
 			insertUserQuery,
-			user.ID, user.Phone, user.Email, user.Password, user.CreatedAt, user.UpdatedAt,
+			user.ID,
+			user.Role,
+			user.Phone,
+			user.Email,
+			user.Password,
+			user.CreatedAt,
+			user.UpdatedAt,
 		)
 	if err != nil {
 		var pgError *pgconn.PgError
 		if errors.As(err, &pgError) && pgError.Code == pgerrcode.UniqueViolation {
+			zap.S().Info(err)
 			return customErrors.ErrUniqueViolation
 		}
+		zap.S().Info(err)
 		return err
 	}
 	return nil
@@ -74,8 +84,17 @@ func (r *UsersRepository) GetUserByEmail(ctx context.Context, email string) (mod
 		)
 
 	var user model.User
-	err := row.Scan(&user.ID, &user.Phone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(
+		&user.ID,
+		&user.Phone,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Role,
+	)
 	if err != nil {
+		zap.S().Info(err)
 		return model.User{}, err
 	}
 

@@ -18,34 +18,79 @@ servers:
       basePath:
         default: "api/v1"
 paths:
-  /users:
+  /users/sign-up:
     post:
-      summary: Create new user
+      summary: Register
       tags:
         - user
-      description: create user
+      description: create account
       requestBody:
         description: User data to be created
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserRequest'
+              $ref: '#/components/schemas/RegistrateUserRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateUserResponse'
+                $ref: '#/components/schemas/RegistrateUserResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /users/sign-in:
+    post:
+      summary: Login
+      tags:
+        - user
+      description: login into account
+      requestBody:
+        description: User credentials to be checked
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/sign-out:
+    post:
+      summary: Logout
+      tags:
+        - user
+      description: logout from an account
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
 components:
   responses:
     BadRequest:
       description: The client side error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Client is unauthorized
       content:
         application/json:
           schema:
@@ -57,7 +102,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
-    CreateUserRequest:
+    RegistrateUserRequest:
       type: object
       required:
         - email
@@ -73,7 +118,7 @@ components:
         phone:
           type: string
           description: The user's phone number.
-    CreateUserResponse:
+    RegistrateUserResponse:
       type: object
       properties:
         id:
@@ -87,6 +132,20 @@ components:
           type: string
           format: email
           description: The user's email address.
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: The user's email address.
+        password:
+          type: string
+          description: The user's password.
+    TokenResponse:
+      token:
+        type: string
+        description: Auth token. 
     Error:
       type: object
       required:

@@ -13,7 +13,7 @@ import (
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/mocks"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/convert"
+	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/service"
 )
 
@@ -30,7 +30,7 @@ func TestCreateUser(t *testing.T) {
 			prepareDataFunc: func() (*service.Users, model.User) {
 				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
 					ID:        uuid.New(),
-					Phone:     convert.StringToAddr("87718665797"),
+					Phone:     helper.StringToAddr("87718665797"),
 					Email:     "artur.zhamaliev@gmail.com",
 					Password:  "password",
 					CreatedAt: time.Now(),
@@ -44,7 +44,7 @@ func TestCreateUser(t *testing.T) {
 			prepareDataFunc: func() (*service.Users, model.User) {
 				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
 					ID:        uuid.New(),
-					Phone:     convert.StringToAddr("87718665797"),
+					Phone:     helper.StringToAddr("87718665797"),
 					Email:     "wrong address",
 					Password:  "password",
 					CreatedAt: time.Now(),
@@ -64,7 +64,7 @@ func TestCreateUser(t *testing.T) {
 
 				return usersService, model.User{
 					ID:        uuid.New(),
-					Phone:     convert.StringToAddr("87718665797"),
+					Phone:     helper.StringToAddr("87718665797"),
 					Email:     userEmail,
 					Password:  "password",
 					CreatedAt: time.Now(),
