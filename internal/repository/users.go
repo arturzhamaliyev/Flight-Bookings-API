@@ -124,6 +124,5 @@ func (r *UsersRepository) UpdateUser(ctx context.Context, user model.User) error
 		zap.S().Info(err)
 		return err
 	}
-
 	return nil
 }

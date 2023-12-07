@@ -22,7 +22,7 @@ func New(h handler.Handler) *gin.Engine {
 
 	v1.GET("/health", h.HealthCheck)
 	v1.POST("/add-admin", cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:8080"},
+		AllowOrigins: []string{"http://localhost"},
 		AllowMethods: []string{"POST"},
 	}), h.AddAdmin)
 

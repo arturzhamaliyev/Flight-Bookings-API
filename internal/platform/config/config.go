@@ -23,7 +23,7 @@ type (
 	}
 
 	Server struct {
-		Port string `default:"8080"`
+		Port string `envconfig:"SERVER_PORT" default:"8080"`
 	}
 )
 
