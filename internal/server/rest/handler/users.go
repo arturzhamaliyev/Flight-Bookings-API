@@ -20,6 +20,7 @@ type UsersService interface {
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	CreateUser(ctx context.Context, user model.User) error
 	ValidateUserPassword(hashedPassword, password string) error
+	UpdateUser(ctx context.Context, user model.User) error
 }
 
 // SignUp will try to create user, responses with Created status and Created user info if no error occured.
@@ -102,4 +103,48 @@ func (h *Handler) SignOut(ctx *gin.Context) {
 		Name:   "token",
 		MaxAge: -1,
 	})
+}
+
+func (h *Handler) UpdateProfile(ctx *gin.Context) {
+	userID, err := helper.GetCurrentUserIDFromToken(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		return
+	}
+
+	var userReq request.UpdateProfile
+	err = ctx.ShouldBindJSON(&userReq)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		return
+	}
+
+	user := model.User{
+		ID:        userID,
+		Phone:     userReq.Phone,
+		Email:     userReq.Email,
+		Password:  userReq.Password,
+		UpdatedAt: time.Now(),
+	}
+
+	err = h.usersService.UpdateUser(ctx, user)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		return
+	}
+
+	resp := response.UpdateProfile{
+		ID:        user.ID,
+		Phone:     user.Phone,
+		Email:     user.Email,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
 }

@@ -26,11 +26,18 @@ func New(h handler.Handler) *gin.Engine {
 		AllowMethods: []string{"POST"},
 	}), h.AddAdmin)
 
+	admin := v1.Group("admin", h.JWTAuthAdmin)
+	{
+		admin.PUT("/:userID/update-profile", h.UpdateProfileByID)
+	}
+
 	users := v1.Group("/users")
 	{
 		users.POST("/sign-up", h.SignUp)
 		users.POST("/sign-in", h.SignIn)
 		users.POST("/sign-out", h.SignOut)
+
+		users.PUT("/update-profile", h.JWTAuthCustomer, h.UpdateProfile)
 	}
 
 	return r

@@ -18,6 +18,8 @@ type (
 	UsersRepository interface {
 		InsertUser(ctx context.Context, user model.User) error
 		GetUserByEmail(ctx context.Context, email string) (model.User, error)
+		// GetUserByID(ctx context.Context, userID string) model.User
+		UpdateUser(ctx context.Context, user model.User) error
 	}
 
 	// Users represents a type that provides operations on users.
@@ -81,4 +83,13 @@ func comparePassword(hashedPassword, password string) bool {
 func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
+}
+
+func (u *Users) UpdateUser(ctx context.Context, user model.User) error {
+	var err error
+	user.Password, err = hashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+	return u.repo.UpdateUser(ctx, user)
 }

@@ -26,13 +26,22 @@ const (
 		)
 		VALUES (
 			$1, $2, $3, $4, $5, $6, $7
-		)
+		);
 	`
 
 	getUserByEmailQuery = `
 		SELECT * 
 		FROM users
-		WHERE email = $1
+		WHERE email = $1;
+	`
+
+	updateUserQuery = `
+		UPDATE users
+		SET phone = $1,
+			email = $2,
+			password = $3,
+			updated_at = $4
+		WHERE id = $5;
 	`
 )
 
@@ -99,4 +108,22 @@ func (r *UsersRepository) GetUserByEmail(ctx context.Context, email string) (mod
 	}
 
 	return user, nil
+}
+
+func (r *UsersRepository) UpdateUser(ctx context.Context, user model.User) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		updateUserQuery,
+		user.Phone,
+		user.Email,
+		user.Password,
+		user.UpdatedAt,
+		user.ID,
+	)
+	if err != nil {
+		zap.S().Info(err)
+		return err
+	}
+
+	return nil
 }
