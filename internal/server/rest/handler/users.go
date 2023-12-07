@@ -145,3 +145,6 @@ func (h *Handler) UpdateProfile(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, resp)
 }
+
+func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
+}

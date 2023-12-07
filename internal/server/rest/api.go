@@ -22,6 +22,11 @@ func New(h handler.Handler) *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 
+	admin := v1.Group("admin", h.JWTAuthAdmin)
+	{
+		admin.PUT("/:userID/update-profile", h.UpdateProfileByID)
+	}
+
 	users := v1.Group("/users")
 	{
 		users.POST("/sign-up", h.SignUp)
