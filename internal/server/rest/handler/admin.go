@@ -18,7 +18,7 @@ func (h *Handler) AddAdmin(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -35,7 +35,7 @@ func (h *Handler) AddAdmin(ctx *gin.Context) {
 	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

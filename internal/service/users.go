@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/mail"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +18,7 @@ type (
 	UsersRepository interface {
 		InsertUser(ctx context.Context, user model.User) error
 		GetUserByEmail(ctx context.Context, email string) (model.User, error)
-		// GetUserByID(ctx context.Context, userID string) model.User
+		GetUserByID(ctx context.Context, ID string) (model.User, error)
 		UpdateUser(ctx context.Context, user model.User) error
 	}
 
@@ -37,7 +37,15 @@ func NewUsersService(repo UsersRepository) *Users {
 
 // GetUserByEmail
 func (u *Users) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
-	return u.repo.GetUserByEmail(ctx, email)
+	user, err := u.repo.GetUserByEmail(ctx, email)
+	if err != nil {
+		zap.S().Info(err)
+		if errors.Is(err, customErrors.ErrNoRows) {
+			return model.User{}, ErrUserNotFound
+		}
+		return model.User{}, err
+	}
+	return user, nil
 }
 
 // CreateUser will try to create a user in our database.
@@ -45,23 +53,23 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
 		zap.S().Info(err)
-		return errors.Join(ErrInvalidEmailAddress, err)
+		return ErrInvalidEmailAddress
 	}
 
 	user.Password, err = hashPassword(user.Password)
 	if err != nil {
 		zap.S().Info(err)
-		return fmt.Errorf("failed to hash password: %w", err)
+		return ErrHashPassword
 	}
 
 	err = u.repo.InsertUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, customErrors.ErrUniqueViolation) {
 			zap.S().Info(err)
-			return errors.Join(ErrUserExists, err)
+			return ErrUserExists
 		}
 		zap.S().Info(err)
-		return fmt.Errorf("couldn't create user: %w", err)
+		return err
 	}
 	return nil
 }
@@ -86,10 +94,24 @@ func hashPassword(password string) (string, error) {
 }
 
 func (u *Users) UpdateUser(ctx context.Context, user model.User) error {
-	var err error
-	user.Password, err = hashPassword(user.Password)
+	foundUser, err := u.repo.GetUserByID(ctx, user.ID.String())
 	if err != nil {
+		zap.S().Info(err)
+		if errors.Is(err, customErrors.ErrNoRows) {
+			return ErrUserNotFound
+		}
 		return err
 	}
-	return u.repo.UpdateUser(ctx, user)
+
+	foundUser.Password, err = hashPassword(user.Password)
+	if err != nil {
+		zap.S().Info(err)
+		return ErrHashPassword
+	}
+
+	foundUser.Email = user.Email
+	foundUser.Phone = user.Phone
+	foundUser.UpdatedAt = time.Now()
+
+	return u.repo.UpdateUser(ctx, foundUser)
 }

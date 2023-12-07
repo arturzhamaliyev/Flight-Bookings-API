@@ -29,7 +29,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -46,7 +46,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -86,7 +86,7 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	token, err := helper.GenerateToken(user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -109,7 +109,7 @@ func (h *Handler) UpdateProfile(ctx *gin.Context) {
 	userID, err := helper.GetCurrentUserIDFromToken(ctx)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -117,22 +117,21 @@ func (h *Handler) UpdateProfile(ctx *gin.Context) {
 	err = ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	user := model.User{
-		ID:        userID,
-		Phone:     userReq.Phone,
-		Email:     userReq.Email,
-		Password:  userReq.Password,
-		UpdatedAt: time.Now(),
+		ID:       userID,
+		Phone:    userReq.Phone,
+		Email:    userReq.Email,
+		Password: userReq.Password,
 	}
 
 	err = h.usersService.UpdateUser(ctx, user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 

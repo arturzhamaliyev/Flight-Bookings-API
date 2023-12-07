@@ -43,6 +43,12 @@ const (
 			updated_at = $4
 		WHERE id = $5;
 	`
+
+	getUserByIDQuery = `
+		SELECT *
+		FROM users
+		WHERE id = $1;
+	`
 )
 
 // UsersRepository provides functionality for working with a postgres database.
@@ -125,4 +131,29 @@ func (r *UsersRepository) UpdateUser(ctx context.Context, user model.User) error
 		return err
 	}
 	return nil
+}
+
+func (r *UsersRepository) GetUserByID(ctx context.Context, ID string) (model.User, error) {
+	row := r.db.QueryRowContext(
+		ctx,
+		getUserByIDQuery,
+		ID,
+	)
+
+	var user model.User
+	err := row.Scan(
+		&user.ID,
+		&user.Phone,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Role,
+	)
+	if err != nil {
+		zap.S().Info(err)
+		return model.User{}, err
+	}
+
+	return user, nil
 }
