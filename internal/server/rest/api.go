@@ -18,9 +18,13 @@ func New(h handler.Handler) *gin.Engine {
 	r.Use(ginzap.RecoveryWithZap(zap.L(), true))
 	r.Use(cors.Default())
 
-	r.GET("/health", h.HealthCheck)
-
 	v1 := r.Group("/api/v1")
+
+	v1.GET("/health", h.HealthCheck)
+	v1.POST("/add-admin", cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:8080"},
+		AllowMethods: []string{"POST"},
+	}), h.AddAdmin)
 
 	users := v1.Group("/users")
 	{
