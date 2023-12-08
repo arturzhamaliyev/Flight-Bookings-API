@@ -146,4 +146,41 @@ func (h *Handler) UpdateProfile(ctx *gin.Context) {
 }
 
 func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var userReq request.UpdateProfile
+	err = ctx.ShouldBindJSON(&userReq)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user := model.User{
+		ID:       userID,
+		Phone:    userReq.Phone,
+		Email:    userReq.Email,
+		Password: userReq.Password,
+	}
+
+	err = h.usersService.UpdateUser(ctx, user)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	resp := response.UpdateProfile{
+		ID:        user.ID,
+		Phone:     user.Phone,
+		Email:     user.Email,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }
