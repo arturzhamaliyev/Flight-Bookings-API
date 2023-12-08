@@ -22,13 +22,13 @@ func New(h handler.Handler) *gin.Engine {
 
 	v1.GET("/health", h.HealthCheck)
 	v1.POST("/add-admin", cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:8080"},
+		AllowOrigins: []string{"http://localhost"},
 		AllowMethods: []string{"POST"},
 	}), h.AddAdmin)
 
 	admin := v1.Group("admin", h.JWTAuthAdmin)
 	{
-		admin.PUT("/:userID/update-profile", h.UpdateProfileByID)
+		admin.PUT("/:id/update-profile", h.UpdateProfileByID)
 	}
 
 	users := v1.Group("/users")
