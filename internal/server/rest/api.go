@@ -37,7 +37,11 @@ func New(h handler.Handler) *gin.Engine {
 		users.POST("/sign-in", h.SignIn)
 		users.POST("/sign-out", h.SignOut)
 
-		users.PUT("/profile/update", h.JWTAuthCustomer, h.UpdateProfile)
+		profile := users.Group("/profile", h.JWTAuthCustomer)
+		{
+			profile.PUT("/update", h.UpdateProfile)
+			profile.DELETE("/delete", h.DeleteProfile)
+		}
 	}
 
 	return r

@@ -184,3 +184,6 @@ func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, resp)
 }
+
+func (h *Handler) DeleteProfile(ctx *gin.Context) {
+}
