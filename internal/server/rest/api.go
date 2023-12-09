@@ -28,7 +28,7 @@ func New(h handler.Handler) *gin.Engine {
 
 	admin := v1.Group("admin", h.JWTAuthAdmin)
 	{
-		admin.PUT("/:id/update-profile", h.UpdateProfileByID)
+		admin.PUT("/users/profile/:id/update", h.UpdateProfileByID)
 	}
 
 	users := v1.Group("/users")
@@ -37,7 +37,7 @@ func New(h handler.Handler) *gin.Engine {
 		users.POST("/sign-in", h.SignIn)
 		users.POST("/sign-out", h.SignOut)
 
-		users.PUT("/update-profile", h.JWTAuthCustomer, h.UpdateProfile)
+		users.PUT("/profile/update", h.JWTAuthCustomer, h.UpdateProfile)
 	}
 
 	return r
