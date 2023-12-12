@@ -45,3 +45,8 @@ func (r *UsersRepositoryMock) GetUserByID(ctx context.Context, ID string) (model
 func (u *UsersRepositoryMock) UpdateUser(ctx context.Context, user model.User) error {
 	return nil
 }
+
+// DeleteUserByID
+func (u *UsersRepositoryMock) DeleteUserByID(ctx context.Context, ID string) error {
+	return nil
+}
