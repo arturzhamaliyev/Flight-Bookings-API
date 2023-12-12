@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
+	"github.com/google/uuid"
 )
 
 // UsersServiceMock
@@ -26,5 +27,15 @@ func (u *UsersServiceMock) CreateUser(ctx context.Context, user model.User) erro
 
 // ValidateUserPassword
 func (u *UsersServiceMock) ValidateUserPassword(hashedPassword, password string) error {
+	return nil
+}
+
+// UpdateUser
+func (u *UsersServiceMock) UpdateUser(ctx context.Context, user model.User) error {
+	return nil
+}
+
+// DeleteUserByID
+func (u *UsersServiceMock) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
 	return nil
 }

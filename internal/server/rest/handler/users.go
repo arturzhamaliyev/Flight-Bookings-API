@@ -20,6 +20,8 @@ type UsersService interface {
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	CreateUser(ctx context.Context, user model.User) error
 	ValidateUserPassword(hashedPassword, password string) error
+	UpdateUser(ctx context.Context, user model.User) error
+	DeleteUserByID(ctx context.Context, ID uuid.UUID) error
 }
 
 // SignUp will try to create user, responses with Created status and Created user info if no error occured.
@@ -28,7 +30,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -45,7 +47,7 @@ func (h *Handler) SignUp(ctx *gin.Context) {
 	err = h.usersService.CreateUser(ctx, user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -64,7 +66,7 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&userReq)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrInvalidRequestData))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
@@ -85,7 +87,7 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	token, err := helper.GenerateToken(user)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusInternalServerError, errorResponse(ErrInternalServer))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
@@ -102,4 +104,120 @@ func (h *Handler) SignOut(ctx *gin.Context) {
 		Name:   "token",
 		MaxAge: -1,
 	})
+}
+
+func (h *Handler) UpdateProfile(ctx *gin.Context) {
+	userID, err := helper.GetCurrentUserIDFromToken(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	var userReq request.UpdateProfile
+	err = ctx.ShouldBindJSON(&userReq)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user := model.User{
+		ID:       userID,
+		Phone:    userReq.Phone,
+		Email:    userReq.Email,
+		Password: userReq.Password,
+	}
+
+	err = h.usersService.UpdateUser(ctx, user)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	resp := response.UpdateProfile{
+		ID:        user.ID,
+		Phone:     user.Phone,
+		Email:     user.Email,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var userReq request.UpdateProfile
+	err = ctx.ShouldBindJSON(&userReq)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user := model.User{
+		ID:       userID,
+		Phone:    userReq.Phone,
+		Email:    userReq.Email,
+		Password: userReq.Password,
+	}
+
+	err = h.usersService.UpdateUser(ctx, user)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	resp := response.UpdateProfile{
+		ID:        user.ID,
+		Phone:     user.Phone,
+		Email:     user.Email,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) DeleteProfile(ctx *gin.Context) {
+	userID, err := helper.GetCurrentUserIDFromToken(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	err = h.usersService.DeleteUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *Handler) DeleteProfileByID(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err = h.usersService.DeleteUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
 }

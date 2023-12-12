@@ -13,7 +13,7 @@ func (h *Handler) JWTAuthAdmin(ctx *gin.Context) {
 	token, err := helper.GetToken(ctx)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrAuthRequired))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		ctx.Abort()
 		return
 	}
@@ -21,7 +21,7 @@ func (h *Handler) JWTAuthAdmin(ctx *gin.Context) {
 	err = helper.ValidateToken(token)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		ctx.Abort()
 		return
 	}
@@ -29,7 +29,7 @@ func (h *Handler) JWTAuthAdmin(ctx *gin.Context) {
 	err = helper.ValidateAdminRole(token)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAdminOnly))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		ctx.Abort()
 		return
 	}
@@ -41,7 +41,7 @@ func (h *Handler) JWTAuthCustomer(ctx *gin.Context) {
 	token, err := helper.GetToken(ctx)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusBadRequest, errorResponse(ErrAuthRequired))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		ctx.Abort()
 		return
 	}
@@ -49,7 +49,7 @@ func (h *Handler) JWTAuthCustomer(ctx *gin.Context) {
 	err = helper.ValidateToken(token)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrAuthRequired))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		ctx.Abort()
 		return
 	}
@@ -57,7 +57,7 @@ func (h *Handler) JWTAuthCustomer(ctx *gin.Context) {
 	err = helper.ValidateCustomerRole(token)
 	if err != nil {
 		zap.S().Info(err)
-		ctx.JSON(http.StatusUnauthorized, errorResponse(ErrCustomerOnly))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		ctx.Abort()
 		return
 	}
