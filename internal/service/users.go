@@ -6,6 +6,7 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
@@ -20,6 +21,7 @@ type (
 		GetUserByEmail(ctx context.Context, email string) (model.User, error)
 		GetUserByID(ctx context.Context, ID string) (model.User, error)
 		UpdateUser(ctx context.Context, user model.User) error
+		DeleteUserByID(ctx context.Context, ID string) error
 	}
 
 	// Users represents a type that provides operations on users.
@@ -114,4 +116,17 @@ func (u *Users) UpdateUser(ctx context.Context, user model.User) error {
 	foundUser.UpdatedAt = time.Now()
 
 	return u.repo.UpdateUser(ctx, foundUser)
+}
+
+func (u *Users) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
+	_, err := u.repo.GetUserByID(ctx, ID.String())
+	if err != nil {
+		zap.S().Info(err)
+		if errors.Is(err, customErrors.ErrNoRows) {
+			return ErrUserNotFound
+		}
+		return err
+	}
+
+	return u.repo.DeleteUserByID(ctx, ID.String())
 }

@@ -28,7 +28,14 @@ func New(h handler.Handler) *gin.Engine {
 
 	admin := v1.Group("admin", h.JWTAuthAdmin)
 	{
-		admin.PUT("/users/profile/:id/update", h.UpdateProfileByID)
+		users := admin.Group("/users")
+		{
+			profile := users.Group("/profile/:id")
+			{
+				profile.PUT("/update", h.UpdateProfileByID)
+				profile.DELETE("/delete", h.DeleteProfileByID)
+			}
+		}
 	}
 
 	users := v1.Group("/users")

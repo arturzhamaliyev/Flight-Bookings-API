@@ -21,6 +21,7 @@ type UsersService interface {
 	CreateUser(ctx context.Context, user model.User) error
 	ValidateUserPassword(hashedPassword, password string) error
 	UpdateUser(ctx context.Context, user model.User) error
+	DeleteUserByID(ctx context.Context, ID uuid.UUID) error
 }
 
 // SignUp will try to create user, responses with Created status and Created user info if no error occured.
@@ -186,4 +187,37 @@ func (h *Handler) UpdateProfileByID(ctx *gin.Context) {
 }
 
 func (h *Handler) DeleteProfile(ctx *gin.Context) {
+	userID, err := helper.GetCurrentUserIDFromToken(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	err = h.usersService.DeleteUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *Handler) DeleteProfileByID(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err = h.usersService.DeleteUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
 }

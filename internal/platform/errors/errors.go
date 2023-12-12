@@ -11,7 +11,7 @@ var (
 	// ErrInvalidToken is returned when jwt token is invalid.
 	ErrInvalidToken = errors.New("invalid token provided")
 	// ErrNotAdminRole is returned when user is not an admin.
-	ErrNotAdminRole = errors.New("invalid admin token provided")
+	ErrNotAdminRole = errors.New("not admin")
 	// ErrNotCustomer is returned when user in not a customer.
-	ErrNotCustomer = errors.New("invalid customer token provided")
+	ErrNotCustomer = errors.New("not customer")
 )

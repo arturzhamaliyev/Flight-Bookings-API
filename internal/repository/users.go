@@ -49,6 +49,11 @@ const (
 		FROM users
 		WHERE id = $1;
 	`
+
+	deleteUserByIDQuery = `
+		DELETE FROM users
+		WHERE id = $1;
+	`
 )
 
 // UsersRepository provides functionality for working with a postgres database.
@@ -156,4 +161,17 @@ func (r *UsersRepository) GetUserByID(ctx context.Context, ID string) (model.Use
 	}
 
 	return user, nil
+}
+
+func (r *UsersRepository) DeleteUserByID(ctx context.Context, ID string) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		deleteUserByIDQuery,
+		ID,
+	)
+	if err != nil {
+		zap.S().Info(err)
+		return err
+	}
+	return nil
 }
