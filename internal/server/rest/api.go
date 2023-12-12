@@ -26,12 +26,13 @@ func New(h handler.Handler) *gin.Engine {
 		AllowMethods: []string{"POST"},
 	}), h.AddAdmin)
 
-	admin := v1.Group("admin", h.JWTAuthAdmin)
+	admin := v1.Group("/admin", h.JWTAuthAdmin)
 	{
 		users := admin.Group("/users")
 		{
 			profile := users.Group("/profile/:id")
 			{
+				profile.GET("/", h.GetProfileByID)
 				profile.PUT("/update", h.UpdateProfileByID)
 				profile.DELETE("/delete", h.DeleteProfileByID)
 			}
@@ -46,6 +47,7 @@ func New(h handler.Handler) *gin.Engine {
 
 		profile := users.Group("/profile", h.JWTAuthCustomer)
 		{
+			profile.GET("/", h.GetProfile)
 			profile.PUT("/update", h.UpdateProfile)
 			profile.DELETE("/delete", h.DeleteProfile)
 		}

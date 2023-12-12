@@ -130,3 +130,17 @@ func (u *Users) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
 
 	return u.repo.DeleteUserByID(ctx, ID.String())
 }
+
+func (u *Users) GetUserByID(ctx context.Context, ID uuid.UUID) (model.User, error) {
+	user, err := u.repo.GetUserByID(ctx, ID.String())
+	if err != nil {
+		zap.S().Info(err)
+		if errors.Is(err, customErrors.ErrNoRows) {
+			return model.User{}, ErrUserNotFound
+		}
+		return model.User{}, err
+
+	}
+
+	return user, nil
+}

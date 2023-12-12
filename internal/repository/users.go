@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/jackc/pgerrcode"
@@ -115,6 +116,9 @@ func (r *UsersRepository) GetUserByEmail(ctx context.Context, email string) (mod
 	)
 	if err != nil {
 		zap.S().Info(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.User{}, customErrors.ErrNoRows
+		}
 		return model.User{}, err
 	}
 
@@ -157,6 +161,9 @@ func (r *UsersRepository) GetUserByID(ctx context.Context, ID string) (model.Use
 	)
 	if err != nil {
 		zap.S().Info(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.User{}, customErrors.ErrNoRows
+		}
 		return model.User{}, err
 	}
 
