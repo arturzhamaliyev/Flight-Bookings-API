@@ -25,20 +25,20 @@ type (
 	}
 
 	// Users represents a type that provides operations on users.
-	Users struct {
+	UsersService struct {
 		repo UsersRepository
 	}
 )
 
 // NewUsersService will instantiate a new instance of Users.
-func NewUsersService(repo UsersRepository) *Users {
-	return &Users{
+func NewUsersService(repo UsersRepository) *UsersService {
+	return &UsersService{
 		repo: repo,
 	}
 }
 
 // GetUserByEmail
-func (u *Users) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
+func (u *UsersService) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	user, err := u.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		zap.S().Info(err)
@@ -51,7 +51,7 @@ func (u *Users) GetUserByEmail(ctx context.Context, email string) (model.User, e
 }
 
 // CreateUser will try to create a user in our database.
-func (u *Users) CreateUser(ctx context.Context, user model.User) error {
+func (u *UsersService) CreateUser(ctx context.Context, user model.User) error {
 	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
 		zap.S().Info(err)
@@ -77,7 +77,7 @@ func (u *Users) CreateUser(ctx context.Context, user model.User) error {
 }
 
 // ValidateUserPassword
-func (u *Users) ValidateUserPassword(hashedPassword, password string) error {
+func (u *UsersService) ValidateUserPassword(hashedPassword, password string) error {
 	if comparePassword(hashedPassword, password) {
 		return nil
 	}
@@ -95,7 +95,7 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (u *Users) UpdateUser(ctx context.Context, user model.User) error {
+func (u *UsersService) UpdateUser(ctx context.Context, user model.User) error {
 	foundUser, err := u.repo.GetUserByID(ctx, user.ID.String())
 	if err != nil {
 		zap.S().Info(err)
@@ -118,7 +118,7 @@ func (u *Users) UpdateUser(ctx context.Context, user model.User) error {
 	return u.repo.UpdateUser(ctx, foundUser)
 }
 
-func (u *Users) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
+func (u *UsersService) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
 	_, err := u.repo.GetUserByID(ctx, ID.String())
 	if err != nil {
 		zap.S().Info(err)
@@ -131,7 +131,7 @@ func (u *Users) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
 	return u.repo.DeleteUserByID(ctx, ID.String())
 }
 
-func (u *Users) GetUserByID(ctx context.Context, ID uuid.UUID) (model.User, error) {
+func (u *UsersService) GetUserByID(ctx context.Context, ID uuid.UUID) (model.User, error) {
 	user, err := u.repo.GetUserByID(ctx, ID.String())
 	if err != nil {
 		zap.S().Info(err)

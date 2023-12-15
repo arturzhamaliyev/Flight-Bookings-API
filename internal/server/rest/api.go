@@ -28,14 +28,19 @@ func New(h handler.Handler) *gin.Engine {
 
 	admin := v1.Group("/admin", h.JWTAuthAdmin)
 	{
-		users := admin.Group("/users")
+		users := admin.Group("/users/:id")
 		{
-			profile := users.Group("/profile/:id")
+			profiles := users.Group("/profiles/:id")
 			{
-				profile.GET("/", h.GetProfileByID)
-				profile.PUT("/update", h.UpdateProfileByID)
-				profile.DELETE("/delete", h.DeleteProfileByID)
+				profiles.GET("", h.GetProfileByID)
+				profiles.PUT("", h.UpdateProfileByID)
+				profiles.DELETE("", h.DeleteProfileByID)
 			}
+		}
+
+		flights := admin.Group("/flights")
+		{
+			flights.POST("", h.CreateFlight)
 		}
 	}
 
@@ -47,9 +52,9 @@ func New(h handler.Handler) *gin.Engine {
 
 		profile := users.Group("/profile", h.JWTAuthCustomer)
 		{
-			profile.GET("/", h.GetProfile)
-			profile.PUT("/update", h.UpdateProfile)
-			profile.DELETE("/delete", h.DeleteProfile)
+			profile.GET("", h.GetProfile)
+			profile.PUT("", h.UpdateProfile)
+			profile.DELETE("", h.DeleteProfile)
 		}
 	}
 
