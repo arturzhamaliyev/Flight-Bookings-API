@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -9,11 +10,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
-	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/platform/helper"
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/request"
 )
 
-type FlightsService interface{}
+type AirportsService interface {
+	FindAirportByCoordinates(ctx context.Context, coordinates model.Coordinates) (model.Airport, error)
+}
 
 func (h *Handler) CreateFlight(ctx *gin.Context) {
 	var flightReq request.CreateFlight
@@ -24,14 +26,14 @@ func (h *Handler) CreateFlight(ctx *gin.Context) {
 		return
 	}
 
-	departureAirport, err := helper.FindAirportByCoordinates(flightReq.Departure)
+	departureAirport, err := h.airportsService.FindAirportByCoordinates(ctx, flightReq.Departure)
 	if err != nil {
 		zap.S().Info(err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	destinationAirport, err := helper.FindAirportByCoordinates(flightReq.Destination)
+	destinationAirport, err := h.airportsService.FindAirportByCoordinates(ctx, flightReq.Destination)
 	if err != nil {
 		zap.S().Info(err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

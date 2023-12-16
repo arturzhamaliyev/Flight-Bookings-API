@@ -28,9 +28,7 @@ type response struct {
 	} `json:"places"`
 }
 
-const url = `https://places.googleapis.com/v1/places:searchNearby`
-
-func FindAirportByCoordinates(coordinates model.Coordinates) (model.Airport, error) {
+func SendRequestToGetExactCoordinatesOfAirport(coordinates model.Coordinates, apiKey, url string) (response, error) {
 	body := []byte(
 		fmt.Sprintf(`
 	{
@@ -55,18 +53,18 @@ func FindAirportByCoordinates(coordinates model.Coordinates) (model.Airport, err
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
 		zap.S().Info(err)
-		return model.Airport{}, err
+		return response{}, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Goog-Api-Key", "AIzaSyBxx7ig2mlKVAhB8UTCKtvbYbilJLXmqKQ")
+	req.Header.Add("X-Goog-Api-Key", apiKey)
 	req.Header.Add("X-Goog-FieldMask", "places.displayName,places.formattedAddress,places.location,places.addressComponents")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		zap.S().Info(err)
-		return model.Airport{}, err
+		return response{}, err
 	}
 	defer resp.Body.Close()
 
@@ -74,23 +72,8 @@ func FindAirportByCoordinates(coordinates model.Coordinates) (model.Airport, err
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		zap.S().Info(err)
-		return model.Airport{}, err
+		return response{}, err
 	}
 
-	var city, country string
-	for _, component := range r.Places[0].AddressComponents {
-		if component.Types[0] == "administrative_area_level_1" {
-			city = component.LongText
-		} else if component.Types[0] == "country" {
-			country = component.LongText
-		}
-	}
-
-	// fmt.Println(r)
-	return model.Airport{
-		Name:        r.Places[0].Name.Text,
-		City:        city,
-		Country:     country,
-		Coordinates: r.Places[0].Location,
-	}, nil
+	return r, nil
 }
