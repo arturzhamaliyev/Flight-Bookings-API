@@ -61,10 +61,17 @@ func main() {
 
 	// Instantiate and connect all our classes
 	usersRepo := repository.NewUsersRepo(db)
-	flightsRepo := repository.NewAirportsRepo(db)
+	airportsRepo := repository.NewAirportsRepo(db)
+	flightsRepo := repository.NewFlightsRepo(db)
+	airplanesRepo := repository.NewAirplanesRepo(db)
+	ranksRepo := repository.NewRanksRepo(db)
+	ticketsRepo := repository.NewTicketsRepo(db)
+
 	usersService := service.NewUsersService(usersRepo)
-	flightsService := service.NewFlightsService(cfg, flightsRepo)
-	handler := handler.New(usersService, flightsService)
+	airportsService := service.NewAirportsService(cfg, airportsRepo)
+	flightsService := service.NewFlightsService(flightsRepo, ranksRepo, airplanesRepo, ticketsRepo)
+
+	handler := handler.New(usersService, airportsService, flightsService)
 	router := rest.New(handler)
 	s := server.New(cfg, router)
 	go func() {

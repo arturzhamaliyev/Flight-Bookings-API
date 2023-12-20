@@ -42,6 +42,11 @@ func New(h handler.Handler) *gin.Engine {
 		{
 			flights.POST("", h.CreateFlight)
 		}
+
+		airplanes := admin.Group("/airplanes")
+		{
+			airplanes.GET("", h.GetAllAirplanes)
+		}
 	}
 
 	users := v1.Group("/users")

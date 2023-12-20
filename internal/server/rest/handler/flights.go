@@ -13,9 +13,16 @@ import (
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/server/rest/handler/request"
 )
 
-type AirportsService interface {
-	FindAirportByCoordinates(ctx context.Context, coordinates model.Coordinates) (model.Airport, error)
-}
+type (
+	AirportsService interface {
+		FindAirportByCoordinates(ctx context.Context, coordinates model.Coordinates) (model.Airport, error)
+	}
+
+	FlightsService interface {
+		CreateFlight(ctx context.Context, flight *model.Flight) error
+		GetAllAirplanes(ctx context.Context) ([]model.Airplane, error)
+	}
+)
 
 func (h *Handler) CreateFlight(ctx *gin.Context) {
 	var flightReq request.CreateFlight
@@ -47,8 +54,31 @@ func (h *Handler) CreateFlight(ctx *gin.Context) {
 		CreatedAt:   time.Now(),
 		Departure:   departureAirport,
 		Destination: destinationAirport,
-		Tickets:     []model.Ticket{},
+		Airplane: model.Airplane{
+			ID: flightReq.AirplaneID,
+		},
 	}
 
+	err = h.flightsService.CreateFlight(ctx, &flight)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// this is done due to unnesacery show of empty tickets
+	flight.Tickets = nil
+
 	ctx.JSON(http.StatusOK, flight)
+}
+
+func (h *Handler) GetAllAirplanes(ctx *gin.Context) {
+	airplanes, err := h.flightsService.GetAllAirplanes(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, airplanes)
 }

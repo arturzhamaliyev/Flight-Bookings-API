@@ -10,13 +10,19 @@ import (
 type Handler struct {
 	usersService    UsersService
 	airportsService AirportsService
+	flightsService  FlightsService
 }
 
 // New will instantiate a new instance of Handler.
-func New(usersService UsersService, airportsService AirportsService) Handler {
+func New(
+	usersService UsersService,
+	airportsService AirportsService,
+	flightsService FlightsService,
+) Handler {
 	return Handler{
 		usersService:    usersService,
 		airportsService: airportsService,
+		flightsService:  flightsService,
 	}
 }
 

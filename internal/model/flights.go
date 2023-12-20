@@ -12,6 +12,8 @@ type Flight struct {
 	EndDate   time.Time
 	CreatedAt time.Time
 
+	Airplane Airplane
+
 	Departure   Airport
 	Destination Airport
 
@@ -35,8 +37,8 @@ func (f Flight) NumberOfAvailableTickets() int {
 func (f Flight) PriceOfTicketsOfEachRank() map[string]uint {
 	pricesByRank := make(map[string]uint)
 	for _, ticket := range f.Tickets {
-		if _, ok := pricesByRank[ticket.Rank.Name]; !ok {
-			pricesByRank[ticket.Rank.Name] = ticket.Price
+		if _, ok := pricesByRank[ticket.Rank.Name.String()]; !ok {
+			pricesByRank[ticket.Rank.Name.String()] = ticket.Price
 		}
 	}
 	return pricesByRank
@@ -45,7 +47,7 @@ func (f Flight) PriceOfTicketsOfEachRank() map[string]uint {
 func (f Flight) NumberOfTicketsOfEachRank() map[string]int {
 	numberOfTicketsByRank := make(map[string]int)
 	for _, ticket := range f.Tickets {
-		numberOfTicketsByRank[ticket.Rank.Name]++
+		numberOfTicketsByRank[ticket.Rank.Name.String()]++
 	}
 	return numberOfTicketsByRank
 }

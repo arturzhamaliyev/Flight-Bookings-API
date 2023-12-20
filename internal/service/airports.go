@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func NewFlightsService(cfg config.Config, repo AirportsRepository) *AirportsService {
+func NewAirportsService(cfg config.Config, repo AirportsRepository) *AirportsService {
 	return &AirportsService{
 		cfg:  cfg,
 		repo: repo,

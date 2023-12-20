@@ -9,6 +9,7 @@ import (
 type Ticket struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
+	UpdatedAt time.Time
 	Flight    Flight
 	User      *User
 	Rank      Rank
