@@ -8,13 +8,21 @@ import (
 
 // Handler represents a HTTP server handler that can handle requests for flight bookings.
 type Handler struct {
-	usersService UsersService
+	usersService    UsersService
+	airportsService AirportsService
+	flightsService  FlightsService
 }
 
 // New will instantiate a new instance of Handler.
-func New(usersService UsersService) Handler {
+func New(
+	usersService UsersService,
+	airportsService AirportsService,
+	flightsService FlightsService,
+) Handler {
 	return Handler{
-		usersService: usersService,
+		usersService:    usersService,
+		airportsService: airportsService,
+		flightsService:  flightsService,
 	}
 }
 

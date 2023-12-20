@@ -9,9 +9,15 @@ import (
 // Config represents the configuration of our application.
 type (
 	Config struct {
-		Server   Server
-		Postgres Postgres
-		Swagger  Swagger
+		Server     Server
+		Postgres   Postgres
+		Swagger    Swagger
+		GoogleMaps GoogleMaps
+	}
+
+	GoogleMaps struct {
+		APIKey string `envconfig:"GOOGLE_API_KEY"`
+		URL    string `envconfig:"GOOGLE_API_URL"`
 	}
 
 	Swagger struct {

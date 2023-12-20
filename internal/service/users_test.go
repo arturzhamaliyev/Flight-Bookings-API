@@ -22,12 +22,12 @@ func TestCreateUser(t *testing.T) {
 
 	testCases := []struct {
 		name            string
-		prepareDataFunc func() (*service.Users, model.User)
+		prepareDataFunc func() (*service.UsersService, model.User)
 		expectedError   error
 	}{
 		{
 			name: "valid",
-			prepareDataFunc: func() (*service.Users, model.User) {
+			prepareDataFunc: func() (*service.UsersService, model.User) {
 				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
 					ID:        uuid.New(),
 					Phone:     helper.StringToAddr("87718665797"),
@@ -41,7 +41,7 @@ func TestCreateUser(t *testing.T) {
 		},
 		{
 			name: "invalid email address",
-			prepareDataFunc: func() (*service.Users, model.User) {
+			prepareDataFunc: func() (*service.UsersService, model.User) {
 				return service.NewUsersService(mocks.NewUsersRepoMock()), model.User{
 					ID:        uuid.New(),
 					Phone:     helper.StringToAddr("87718665797"),
@@ -55,7 +55,7 @@ func TestCreateUser(t *testing.T) {
 		},
 		{
 			name: "user already exists",
-			prepareDataFunc: func() (*service.Users, model.User) {
+			prepareDataFunc: func() (*service.UsersService, model.User) {
 				usersRepo := mocks.NewUsersRepoMock()
 				usersService := service.NewUsersService(usersRepo)
 

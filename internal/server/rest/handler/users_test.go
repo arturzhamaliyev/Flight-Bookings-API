@@ -58,7 +58,7 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	router := rest.New(handler.New(mocks.NewUsersServiceMock()))
+	router := rest.New(handler.New(mocks.NewUsersServiceMock(), nil))
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

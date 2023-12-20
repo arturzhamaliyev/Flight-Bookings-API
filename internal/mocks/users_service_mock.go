@@ -39,3 +39,8 @@ func (u *UsersServiceMock) UpdateUser(ctx context.Context, user model.User) erro
 func (u *UsersServiceMock) DeleteUserByID(ctx context.Context, ID uuid.UUID) error {
 	return nil
 }
+
+// GetUserByID
+func (u *UsersServiceMock) GetUserByID(ctx context.Context, ID uuid.UUID) (model.User, error) {
+	return model.User{}, nil
+}

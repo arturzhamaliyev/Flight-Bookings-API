@@ -17,6 +17,7 @@ import (
 
 // UsersService represents a type that provides operations on users.
 type UsersService interface {
+	GetUserByID(ctx context.Context, ID uuid.UUID) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	CreateUser(ctx context.Context, user model.User) error
 	ValidateUserPassword(hashedPassword, password string) error
@@ -220,4 +221,56 @@ func (h *Handler) DeleteProfileByID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *Handler) GetProfile(ctx *gin.Context) {
+	userID, err := helper.GetCurrentUserIDFromToken(ctx)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	user, err := h.usersService.GetUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	resp := response.GetProfile{
+		ID:        user.ID,
+		Role:      user.Role.Name(),
+		Phone:     user.Phone,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) GetProfileByID(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := h.usersService.GetUserByID(ctx, userID)
+	if err != nil {
+		zap.S().Info(err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	resp := response.GetProfile{
+		ID:        user.ID,
+		Role:      user.Role.Name(),
+		Phone:     user.Phone,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }

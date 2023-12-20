@@ -19,3 +19,11 @@ type UpdateProfile struct {
 	Email     string    `json:"email"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+type GetProfile struct {
+	ID        uuid.UUID `json:"id"`
+	Role      string    `json:"role"`
+	Phone     *string   `json:"phone,omitempty"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
+}

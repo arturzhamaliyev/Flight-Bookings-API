@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 	ctx := context.Background()
 	usersRepo := repository.NewUsersRepo(db)
 	usersService := service.NewUsersService(usersRepo)
-	router := rest.New(handler.New(usersService))
+	router := rest.New(handler.New(usersService, nil))
 
 	testCases := []struct {
 		name             string
