@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   postgres:
+    container_name: postgres_db
     image: postgres:latest
     environment:
       POSTGRES_DB: "postgres"
@@ -8,5 +9,52 @@ services:
       POSTGRES_PASSWORD: "passwd"
     ports:
       - "5432:5432"
+    networks:
+      - flight_booking_backend
     volumes:
-      - ~/apps/postgres:/var/lib/postgresql/data
+      - "postgres_data:/data/db"
+
+  flight_booking:
+    container_name: flight_booking_api
+    build: .
+    env_file:
+      - "local.env"
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - flight_booking_backend
+    volumes:
+      - "flight_booking_data:/app"
+
+  migrate:
+    image: migrate/migrate
+    container_name: flight_migrate
+    restart: on-failure
+    command:
+      [
+        "-source",
+        "file://migrations",
+        "-database",
+        "postgres://postgres:passwd@postgres_db:5432/postgres?sslmode=disable",
+        "up"
+      ]
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    networks:
+      - flight_booking_backend
+    volumes:
+      - ./migrations/:/migrations
+
+volumes:
+  flight_booking_data:
+  postgres_data:
+
+
+networks:
+  flight_booking_backend:
+    driver: bridge
