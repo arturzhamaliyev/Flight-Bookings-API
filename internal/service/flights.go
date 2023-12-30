@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jftuga/geodist"
 	"go.uber.org/zap"
 
 	"github.com/arturzhamaliyev/Flight-Bookings-API/internal/model"
@@ -72,10 +74,30 @@ func (f *FlightsService) CreateFlight(ctx context.Context, flight *model.Flight)
 	}
 
 	numberOfSeatsByRank := make(map[model.Rank]uint16)
+	ticketPricesByRank := make(map[model.Rank]uint)
+
+	// distance between two coordinates
+	// in this case between airports
+	_, km, err := geodist.VincentyDistance(
+		geodist.Coord{
+			Lat: flight.Departure.Coordinates.Latitude,
+			Lon: flight.Departure.Coordinates.Longitude,
+		},
+		geodist.Coord{
+			Lat: flight.Destination.Coordinates.Latitude,
+			Lon: flight.Destination.Coordinates.Longitude,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
 	for _, rank := range ranks {
 		numberOfSeatsByRank[rank] = flight.
 			Airplane.
 			NumberOfSeatsByRank(rank.Name)
+
+		ticketPricesByRank[rank] = f.CalculatePrice(km, rank)
 	}
 
 	curTime := time.Now()
@@ -88,6 +110,7 @@ func (f *FlightsService) CreateFlight(ctx context.Context, flight *model.Flight)
 			flight.Tickets[ticketNumber].CreatedAt = curTime
 			flight.Tickets[ticketNumber].Flight = *flight
 			flight.Tickets[ticketNumber].Rank = rank
+			flight.Tickets[ticketNumber].Price = ticketPricesByRank[rank]
 
 			ticketNumber++
 			numberOfSeats--
@@ -118,4 +141,20 @@ func (f *FlightsService) GetAllAirplanes(ctx context.Context) ([]model.Airplane,
 		return nil, err
 	}
 	return airplanes, nil
+}
+
+func (f *FlightsService) CalculatePrice(distance float64, rank model.Rank) uint {
+	someImagenaryNumber := 1.1
+	price := distance * someImagenaryNumber
+
+	switch rank.Name {
+	case model.Economy:
+		price *= 0.75
+	case model.Business:
+		price *= 1.5
+	case model.Deluxe:
+		price *= 3
+	}
+
+	return uint(math.Ceil(price))
 }

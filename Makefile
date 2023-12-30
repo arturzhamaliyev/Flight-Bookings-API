@@ -26,3 +26,7 @@ compose_up:
 
 compose_down:
 	@docker-compose down
+
+PHONY: logs
+logs:
+	@docker logs flight_booking

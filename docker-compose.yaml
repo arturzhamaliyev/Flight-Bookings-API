@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  postgres:
+  postgres_db:
     container_name: postgres_db
     image: postgres:latest
     environment:
@@ -15,7 +15,7 @@ services:
       - "postgres_data:/data/db"
 
   flight_booking:
-    container_name: flight_booking_api
+    container_name: flight_booking
     build: .
     env_file:
       - "local.env"
@@ -23,7 +23,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - postgres_db
     networks:
       - flight_booking_backend
     volumes:
@@ -31,7 +31,7 @@ services:
 
   migrate:
     image: migrate/migrate
-    container_name: flight_migrate
+    container_name: migrate
     restart: on-failure
     command:
       [
@@ -42,9 +42,9 @@ services:
         "up"
       ]
     links:
-      - postgres
+      - postgres_db
     depends_on:
-      - postgres
+      - postgres_db
     networks:
       - flight_booking_backend
     volumes:
